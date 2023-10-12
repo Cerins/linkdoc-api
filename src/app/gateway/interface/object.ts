@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { OnlyPrimitiveValues } from '@/utils/types';
+import { OnlyPrimitiveValues } from '../../../utils/types';
 
 interface IObjectGateway {
   readonly id: string;

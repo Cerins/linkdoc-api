@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { IUserGateway, UserGatewayType } from '@/app/gateway/interface/user';
+import { IUserGateway, UserGatewayType } from '../../app/gateway/interface/user';
 
 interface Dependencies {
   UserGateway: UserGatewayType;

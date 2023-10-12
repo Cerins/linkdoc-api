@@ -1,5 +1,5 @@
-import UserMemoryGateway from '@/app/gateway/memory/user';
-import defineUser from '@/app/model/user';
+import UserMemoryGateway from '../../../app/gateway/memory/user';
+import defineUser from '../../../app/model/user';
 import { describe, test, expect, beforeEach } from 'vitest';
 
 const usrInfo = {
