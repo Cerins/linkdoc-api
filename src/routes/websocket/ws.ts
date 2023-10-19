@@ -1,0 +1,7 @@
+interface Dependencies {
+
+}
+
+class WSWebsocket {
+
+}

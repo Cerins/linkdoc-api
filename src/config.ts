@@ -1,7 +1,6 @@
 import appConfig from 'config';
 import { z } from 'zod';
 
-
 const rawConfig = appConfig.get('linkdoc');
 
 // Validate using zod
@@ -14,7 +13,14 @@ const schema = z.object({
         })
     }),
     controllers: z.object({}),
-    routes: z.object({}),
+    routes: z.object({
+        http: z.object({
+            port: z.number().gt(0)
+        }),
+        websocket: z.object({
+            port: z.number().gt(0)
+        })
+    }),
     utils: z.object({
         JWT: z.object({
             secret: z.string(),

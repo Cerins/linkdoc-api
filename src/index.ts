@@ -29,7 +29,10 @@ const controllers = {
 
 const httpUserRouter = new ExpressAPI({
     controllers,
-    logger
+    logger,
+    config: {
+        port: config.routes.http.port
+    }
 });
 
 httpUserRouter.start().catch((err) => {

@@ -1,18 +1,22 @@
 export = {
     linkdoc: {
-        // All app model
+    // All app model
         app: {
             model: {
                 User: {
-                // How many rounds of salt to use when hashing passwords
+                    // How many rounds of salt to use when hashing passwords
                     saltRounds: 10
                 }
             }
         },
-        controllers: {
-        },
+        controllers: {},
         routes: {
-
+            http: {
+                port: 3000
+            },
+            websocket: {
+                port: 3001
+            }
         },
         utils: {
             JWT: {
@@ -27,4 +31,4 @@ export = {
             }
         }
     }
-}
+};

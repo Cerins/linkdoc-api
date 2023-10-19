@@ -15,6 +15,9 @@ interface Dependencies {
     HTTPUserController: IHTTPUserController;
   };
   logger: ILogger;
+  config: {
+    port: number;
+  };
 }
 
 const GenericResponse = new ResponseHelper({
@@ -38,6 +41,10 @@ class ExpressAPI {
 
     protected get logger() {
         return this.dependencies.logger;
+    }
+
+    protected get config() {
+        return this.dependencies.config;
     }
 
     constructor(dependencies: Dependencies) {
@@ -139,8 +146,8 @@ class ExpressAPI {
     }
 
     public async start() {
-        this.app.listen(3000, () => {
-            this.logger.log('info', 'Server started on port 3000');
+        this.app.listen(this.config.port, () => {
+            this.logger.log('info', `Server started on port ${this.config.port}`);
         });
     }
 }
