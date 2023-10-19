@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import type { IUser } from '../../app/model/interface/user';
 import ResponseHelper, { IReq, IRes } from './utils/resHandler';
 import async from './utils/handlePromise';
 import JWT from '../../utils/jwt';
+import { IUser } from '../../app/model/interface/user';
 
 interface Dependencies {
   models: {
@@ -31,7 +31,7 @@ function defineHTTPUserController(dependencies: Dependencies) {
         private constructor() {}
 
         @async()
-        static async login(req: IReq, res: IRes) {
+        static async login(req: IReq, res: IRes, next: unknown) {
             const { User } = dependencies.models;
             const { username, password } = loginBodySchema.parse(req.body);
             const user = await User.findByUsername(username);

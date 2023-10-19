@@ -3,18 +3,16 @@ import UserMemoryGateway from './app/gateway/memory/user';
 import ExpressAPI from './routes/http/express';
 import defineHTTPUserController from './controllers/http/user';
 import createLogger from './utils/logger';
-
-// TODO - Move to .env file
-const UserConfig = {
-    saltRounds: 10
-};
+import config from './config';
 
 const models = {
     User: defineUser(
         {
             UserGateway: UserMemoryGateway
         },
-        UserConfig
+        {
+            saltRounds: config.app.model.User.saltRounds
+        }
     )
 };
 

@@ -1,6 +1,10 @@
-import defineUser from '../../../app/model/user';
-
-type IUser = ReturnType<typeof defineUser>
+interface IUser {
+    findByUsername(username: string): Promise<{
+        id: string;
+        name: string;
+        validatePassword(password: string): Promise<boolean>;
+    } | undefined>;
+}
 
 export type {
     IUser

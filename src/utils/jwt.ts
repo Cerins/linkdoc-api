@@ -1,3 +1,7 @@
+import { sign, verify } from 'jsonwebtoken';
+import config from '../config';
+
+const { secret, expiresIn } = config.utils.JWT;
 
 class JWT {
     private payload: Record<string, unknown>;
@@ -7,15 +11,20 @@ class JWT {
     }
 
     public sign(): string {
-        return this.payload.usrID as string;
+        return sign(this.payload, secret, {
+            expiresIn
+        });
+    }
+
+    public get<T>(key: string): unknown {
+        return this.payload[key];
     }
 
     public static validate(
         token: string
     ): JWT {
-        return new JWT({
-            usrID: token
-        });
+        const payload = verify(token, secret) as Record<string, unknown>;
+        return new JWT(payload);
     }
 }
 
