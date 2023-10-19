@@ -1,7 +1,8 @@
 import defineUser from './app/model/user';
 import UserMemoryGateway from './app/gateway/memory/user';
-import HTTPUserController from './controllers/http/user';
 import ExpressAPI from './routes/http/express';
+import defineHTTPUserController from './controllers/http/user';
+import createLogger from './utils/logger';
 
 // TODO - Move to .env file
 const UserConfig = {
@@ -9,27 +10,30 @@ const UserConfig = {
 };
 
 const models = {
-    User: defineUser({
-        UserGateway: UserMemoryGateway
-    }, UserConfig)
-};
-
-const controllers = {
-    HTTPUserController: new HTTPUserController(
+    User: defineUser(
         {
-            models
-        }
+            UserGateway: UserMemoryGateway
+        },
+        UserConfig
     )
 };
 
+// Register a user for testing
+models.User.register('username', 'password');
 
-const httpUserRouter = new ExpressAPI(
-    {
-        controllers
-    }
-);
+const logger = createLogger();
 
-httpUserRouter.start().catch((err)=>{
-    console.error(err);
+const controllers = {
+    HTTPUserController: defineHTTPUserController({
+        models
+    })
+};
+
+const httpUserRouter = new ExpressAPI({
+    controllers,
+    logger
 });
 
+httpUserRouter.start().catch((err) => {
+    logger.log('error', 'Error starting server', err);
+});

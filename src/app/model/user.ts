@@ -19,6 +19,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
         public password: string;
         public id: string;
         private user: IUserGateway;
+
         private constructor(user: IUserGateway) {
             this.user = user;
             this.id = user.id;
@@ -39,6 +40,10 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return await bcrypt.compare(password, hash);
         }
 
+        validatePassword(password: string) {
+            return User.compare(password, this.password);
+        }
+
         static async register(name: string, password: string) {
             const user = new UserGateway();
             user.name = name;
@@ -47,18 +52,14 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return new User(user);
         }
 
-        static async login(name: string, password: string) {
+        static async findByUsername(name: string) {
             const user = await UserGateway.findOne({
                 where: {
                     name
                 }
             });
-            if (!user) {
-                throw new Error('USER NOT FOUND');
-            }
-            const isPasswordCorrect = await this.compare(password, user.password);
-            if (!isPasswordCorrect) {
-                throw new Error('BAD PASSWORD');
+            if(!user) {
+                return undefined;
             }
             return new User(user);
         }

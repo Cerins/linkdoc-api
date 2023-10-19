@@ -1,34 +1,65 @@
+import { z } from 'zod';
 import type { IUser } from '../../app/model/interface/user';
+import ResponseHelper, { IReq, IRes } from './utils/resHandler';
+import async from './utils/handlePromise';
+import JWT from '../../utils/jwt';
 
 interface Dependencies {
-    models: {
-        User: IUser
+  models: {
+    User: IUser;
+  };
+}
+
+const USRResponse = new ResponseHelper({
+    AUTH_SUCCESS: {
+        code: 200,
+        description: 'Authentication successful'
+    },
+    AUTH_FAILED: {
+        code: 401,
+        description: 'Authentication failed'
     }
-}
+});
 
-interface Request {
-    body: unknown
-}
+const loginBodySchema = z.object({
+    username: z.string(),
+    password: z.string()
+});
 
-interface Response {
-    json: (data: unknown)=>void
-}
+function defineHTTPUserController(dependencies: Dependencies) {
+    class HTTPUserController {
+        private constructor() {}
 
-class HTTPUserController {
-
-    private dependencies: Dependencies;
-
-    constructor(
-        dependencies: Dependencies
-    ) {
-        this.dependencies = dependencies;
+        @async()
+        static async login(req: IReq, res: IRes) {
+            const { User } = dependencies.models;
+            const { username, password } = loginBodySchema.parse(req.body);
+            const user = await User.findByUsername(username);
+            if (!user) {
+                throw USRResponse.error('AUTH_FAILED', undefined, {
+                    username,
+                    reason: 'User not found'
+                });
+            }
+            const isPasswordValid = await user.validatePassword(password);
+            if (!isPasswordValid) {
+                throw USRResponse.error('AUTH_FAILED', undefined, {
+                    username,
+                    reason: 'Invalid password'
+                });
+            }
+            const jwt = new JWT({
+                usrID: user.id
+            });
+            USRResponse.send(res, 'AUTH_SUCCESS', {
+                token: jwt.sign()
+            });
+        }
     }
-
-    async login(req: Request, res:Response) {
-        res.json({
-            'hello': 'world'
-        });
-    }
+    return HTTPUserController;
 }
 
-export default HTTPUserController;
+type IHTTPUserController = ReturnType<typeof defineHTTPUserController>;
+
+export default defineHTTPUserController;
+export type { IHTTPUserController };
