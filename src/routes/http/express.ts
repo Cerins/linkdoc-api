@@ -147,7 +147,7 @@ class ExpressAPI {
 
     public async start() {
         this.app.listen(this.config.port, () => {
-            this.logger.log('info', `Server started on port ${this.config.port}`);
+            this.logger.log('info', `Express server started on port ${this.config.port}`);
         });
     }
 }

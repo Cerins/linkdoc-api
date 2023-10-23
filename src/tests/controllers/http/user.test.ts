@@ -2,6 +2,7 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import defineHTTPUserController from '../../../controllers/http/user';
 import { ReqError } from '../../../controllers/http/utils/resHandler';
 import JWT from '../../../utils/jwt';
+import { ZodError } from 'zod';
 
 describe('HTTP User controller test', () => {
     describe('Login', () => {
@@ -68,37 +69,41 @@ describe('HTTP User controller test', () => {
             loggerErrorMock.mockClear();
             nextMock.mockClear();
         });
-        test('Trying to login to login with wrong password throws an error', async () => {
-            const req = {
-                body: {
-                    username: usrInfo.name,
-                    password: wrongUsrInfo.password
-                },
-                params: {},
-                query: {}
-            };
-            await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).toHaveBeenCalledTimes(1);
-            expect(findByUserNameMock).toHaveBeenCalledWith(usrInfo.name);
-            expect(nextMock).toHaveBeenCalledTimes(1);
-            expect(nextMock).toBeCalledWith(expect.any(ReqError));
-        });
-        test('Trying to login to login with wrong username throws an error', async () => {
-            const req = {
-                body: {
-                    username: wrongUsrInfo.name,
-                    password: usrInfo.password
-                },
-                params: {},
-                query: {}
-            };
-            await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).toHaveBeenCalledTimes(1);
-            expect(findByUserNameMock).toHaveBeenCalledWith(wrongUsrInfo.name);
-            expect(nextMock).toHaveBeenCalledTimes(1);
-            expect(nextMock).toBeCalledWith(expect.any(ReqError));
-        });
-        test('Can login with correct username and password', async () => {
+        test(
+            'Throw an error when logging in with a correct username but incorrect password"',
+            async () => {
+                const req = {
+                    body: {
+                        username: usrInfo.name,
+                        password: wrongUsrInfo.password
+                    },
+                    params: {},
+                    query: {}
+                };
+                await HTTPUserController.login(req, res, nextMock);
+                expect(findByUserNameMock).toHaveBeenCalledTimes(1);
+                expect(findByUserNameMock).toHaveBeenCalledWith(usrInfo.name);
+                expect(nextMock).toHaveBeenCalledTimes(1);
+                expect(nextMock).toBeCalledWith(expect.any(ReqError));
+            });
+        test(
+            'Throw an error when logging in with a non-existent username'
+            , async () => {
+                const req = {
+                    body: {
+                        username: wrongUsrInfo.name,
+                        password: usrInfo.password
+                    },
+                    params: {},
+                    query: {}
+                };
+                await HTTPUserController.login(req, res, nextMock);
+                expect(findByUserNameMock).toHaveBeenCalledTimes(1);
+                expect(findByUserNameMock).toHaveBeenCalledWith(wrongUsrInfo.name);
+                expect(nextMock).toHaveBeenCalledTimes(1);
+                expect(nextMock).toBeCalledWith(expect.any(ReqError));
+            });
+        test('Successfully login with correct username and password', async () => {
             const req = {
                 body: {
                     username: usrInfo.name,
@@ -126,6 +131,60 @@ describe('HTTP User controller test', () => {
             // Expect iat and exp to be a number
             expect(jwt.get('iat')).toEqual(expect.any(Number));
             expect(jwt.get('exp')).toEqual(expect.any(Number));
+        });
+        test('Throw an error when the username is not a string', async () => {
+            const req = {
+                body: {
+                    username: 123,
+                    password: usrInfo.password
+                },
+                params: {},
+                query: {}
+            };
+            await HTTPUserController.login(req, res, nextMock);
+            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(ZodError));
+        });
+        test('Throw an error when the password is not a string', async () => {
+            const req = {
+                body: {
+                    username: usrInfo.name,
+                    password: 123
+                },
+                params: {},
+                query: {}
+            };
+            await HTTPUserController.login(req, res, nextMock);
+            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(ZodError));
+        });
+        test('Throw an error when the username is not provided', async () => {
+            const req = {
+                body: {
+                    password: usrInfo.password
+                },
+                params: {},
+                query: {}
+            };
+            await HTTPUserController.login(req, res, nextMock);
+            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(ZodError));
+        });
+        test('Throw an error when the password is not provided', async () => {
+            const req = {
+                body: {
+                    username: usrInfo.name
+                },
+                params: {},
+                query: {}
+            };
+            await HTTPUserController.login(req, res, nextMock);
+            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(ZodError));
         });
     });
 });
