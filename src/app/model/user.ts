@@ -52,9 +52,10 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return new User(user);
         }
 
-        static async findByUsername(name: string) {
+        static async find({ id, name }: { id?: string, name?: string }) {
             const user = await UserGateway.findOne({
                 where: {
+                    id,
                     name
                 }
             });

@@ -22,7 +22,9 @@ describe('User tests', () => {
     });
     test('Trying to login with wrong password throws an error', async () => {
         await User.register(usrInfo.name, usrInfo.password);
-        const usr = await User.findByUsername(usrInfo.name);
+        const usr = await User.find({
+            name: usrInfo.name
+        });
         expect(usr).toBeDefined();
         await expect(usr?.validatePassword('wrongPassword')).resolves.toBeFalsy();
     });
@@ -30,7 +32,11 @@ describe('User tests', () => {
         const a = await User.register(usrInfo.name, usrInfo.password);
         expect(a.name).toBe(usrInfo.name);
         expect(a.password).not.toBe(usrInfo.password);
-        const b = await User.findByUsername(usrInfo.name);
+        const b = await User.find(
+            {
+                name: usrInfo.name
+            }
+        );
         expect(b).toBeDefined();
         expect(b!.name).toBe(usrInfo.name);
         expect(b!.password).not.toBe(usrInfo.password);

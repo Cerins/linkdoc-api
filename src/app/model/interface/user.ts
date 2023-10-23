@@ -1,5 +1,8 @@
 interface IUser {
-    findByUsername(username: string): Promise<{
+    find(properties: {
+        id?: string;
+        name?: string;
+    }): Promise<{
         id: string;
         name: string;
         validatePassword(password: string): Promise<boolean>;

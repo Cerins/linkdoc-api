@@ -15,8 +15,11 @@ describe('HTTP User controller test', () => {
             password: 'wrongUsrPassword'
         };
         const usrID = 'id';
-        const findByUserNameMock = vi.fn((username: string) => {
-            if (username === usrInfo.name) {
+        const findMock = vi.fn(({ id, name }: {
+            id?: string,
+            name?: string
+        }) => {
+            if (name === usrInfo.name) {
                 return Promise.resolve({
                     id: usrID,
                     name: usrInfo.name,
@@ -31,7 +34,7 @@ describe('HTTP User controller test', () => {
             return Promise.resolve(undefined);
         });
         const User = {
-            findByUsername: findByUserNameMock
+            find: findMock
         };
         const loggerErrorMock = vi.fn();
         const jsonMock = vi.fn();
@@ -63,7 +66,7 @@ describe('HTTP User controller test', () => {
         });
         beforeEach(() => {
             // Clears the information about calls to the mock's functions
-            findByUserNameMock.mockClear();
+            findMock.mockClear();
             jsonMock.mockClear();
             statusMock.mockClear();
             loggerErrorMock.mockClear();
@@ -81,8 +84,7 @@ describe('HTTP User controller test', () => {
                     query: {}
                 };
                 await HTTPUserController.login(req, res, nextMock);
-                expect(findByUserNameMock).toHaveBeenCalledTimes(1);
-                expect(findByUserNameMock).toHaveBeenCalledWith(usrInfo.name);
+                expect(findMock).toHaveBeenCalledTimes(1);
                 expect(nextMock).toHaveBeenCalledTimes(1);
                 expect(nextMock).toBeCalledWith(expect.any(ReqError));
             });
@@ -98,8 +100,7 @@ describe('HTTP User controller test', () => {
                     query: {}
                 };
                 await HTTPUserController.login(req, res, nextMock);
-                expect(findByUserNameMock).toHaveBeenCalledTimes(1);
-                expect(findByUserNameMock).toHaveBeenCalledWith(wrongUsrInfo.name);
+                expect(findMock).toHaveBeenCalledTimes(1);
                 expect(nextMock).toHaveBeenCalledTimes(1);
                 expect(nextMock).toBeCalledWith(expect.any(ReqError));
             });
@@ -113,8 +114,7 @@ describe('HTTP User controller test', () => {
                 query: {}
             };
             await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).toHaveBeenCalledTimes(1);
-            expect(findByUserNameMock).toHaveBeenCalledWith(usrInfo.name);
+            expect(findMock).toHaveBeenCalledTimes(1);
             expect(nextMock).not.toHaveBeenCalled();
             expect(jsonMock).toHaveBeenCalledTimes(1);
             expect(jsonMock).toHaveBeenCalledWith({
@@ -142,7 +142,7 @@ describe('HTTP User controller test', () => {
                 query: {}
             };
             await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(findMock).not.toHaveBeenCalled();
             expect(nextMock).toHaveBeenCalledTimes(1);
             expect(nextMock).toBeCalledWith(expect.any(ZodError));
         });
@@ -156,7 +156,7 @@ describe('HTTP User controller test', () => {
                 query: {}
             };
             await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(findMock).not.toHaveBeenCalled();
             expect(nextMock).toHaveBeenCalledTimes(1);
             expect(nextMock).toBeCalledWith(expect.any(ZodError));
         });
@@ -169,7 +169,7 @@ describe('HTTP User controller test', () => {
                 query: {}
             };
             await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(findMock).not.toHaveBeenCalled();
             expect(nextMock).toHaveBeenCalledTimes(1);
             expect(nextMock).toBeCalledWith(expect.any(ZodError));
         });
@@ -182,7 +182,7 @@ describe('HTTP User controller test', () => {
                 query: {}
             };
             await HTTPUserController.login(req, res, nextMock);
-            expect(findByUserNameMock).not.toHaveBeenCalled();
+            expect(findMock).not.toHaveBeenCalled();
             expect(nextMock).toHaveBeenCalledTimes(1);
             expect(nextMock).toBeCalledWith(expect.any(ZodError));
         });

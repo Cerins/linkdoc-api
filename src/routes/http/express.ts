@@ -59,7 +59,9 @@ class ExpressAPI {
     }
 
     protected initMiddlewares() {
-    // Setup logger middleware
+    // Setup json body parser
+        this.app.use(express.json());
+        // Setup logger middleware
         this.app.use((req, res, next) => {
             // Make so that the logger appends request info to the log
             const { logger } = this.dependencies;
@@ -147,7 +149,10 @@ class ExpressAPI {
 
     public async start() {
         this.app.listen(this.config.port, () => {
-            this.logger.log('info', `Express server started on port ${this.config.port}`);
+            this.logger.log(
+                'info',
+                `Express server started on port ${this.config.port}`
+            );
         });
     }
 }

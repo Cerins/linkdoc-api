@@ -34,7 +34,9 @@ function defineHTTPUserController(dependencies: Dependencies) {
         static async login(req: IReq, res: IRes, next: unknown) {
             const { User } = dependencies.models;
             const { username, password } = loginBodySchema.parse(req.body);
-            const user = await User.findByUsername(username);
+            const user = await User.find({
+                name: username
+            });
             if (!user) {
                 throw USRResponse.error('AUTH_FAILED', undefined, {
                     username,

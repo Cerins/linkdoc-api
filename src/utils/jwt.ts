@@ -16,8 +16,8 @@ class JWT {
         });
     }
 
-    public get<T>(key: string): unknown {
-        return this.payload[key];
+    public get<T>(key: string) {
+        return this.payload[key] as T;
     }
 
     public static validate(
