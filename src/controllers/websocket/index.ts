@@ -1,7 +1,8 @@
 import type ILogger from '../../utils/interface/logger';
 import { IUser } from '../../app/model/interface/user';
 import JWT from '../../utils/jwt';
-import { unknown } from 'zod';
+import { z } from 'zod';
+import type { HandlerFn } from './handlers';
 
 interface ISocket {
   on(event: string, callback: (...args: unknown[]) => void): void;
@@ -34,6 +35,7 @@ interface IWebSocketServer {
   emit(event: string, ...args: unknown[]): void;
 }
 
+
 interface Dependencies {
   config: {
     baseUrl: string;
@@ -44,10 +46,27 @@ interface Dependencies {
   };
 }
 
+const messageSchema = z.object({
+    name: z.string(),
+    payload: z.unknown()
+});
+
 export default function defineSocketController(dependencies: Dependencies) {
     const { logger } = dependencies;
     return class SocketController {
-        ws: IWebSocket;
+        protected static onMessageHandlers = new Map<string, HandlerFn>();
+
+        public static registerHandler(
+            name: string,
+            handler: HandlerFn
+        ) {
+            if(SocketController.onMessageHandlers.has(name)) {
+                throw new Error('Handler already registered');
+            }
+            SocketController.onMessageHandlers.set(name, handler);
+        }
+
+        protected ws: IWebSocket;
 
         public constructor(ws: IWebSocket) {
             this.ws = ws;
@@ -63,15 +82,24 @@ export default function defineSocketController(dependencies: Dependencies) {
             logger.log('error', 'Socket error');
         }
 
+        protected errorMiddleware() {
+
+        }
+
         public onMessage(data: Buffer) {
-            logger.log('info', 'Socket message', {
-                data
-            });
-            this.ws.send(
-                JSON.stringify({
-                    message: 'Hello from the server'
-                })
-            );
+            // First
+            // Take the data and parse it as JSON
+            // Then check if it matches the schema
+            const content = JSON.parse(data.toString());
+            const message = messageSchema.parse(content);
+            const { name, payload } = message;
+            // Check if the handler exists
+            const handler = SocketController.onMessageHandlers.get(name);
+            if(!handler) {
+                throw new Error('Handler not found');
+            }
+            // Call the handler
+            handler.call(this,payload, this.ws, this.errorMiddleware.bind(this));
         }
 
         public onClose() {
@@ -132,4 +160,4 @@ export default function defineSocketController(dependencies: Dependencies) {
 type SocketControllerType = ReturnType<typeof defineSocketController>;
 // Get the instance type
 type ISocketController = InstanceType<SocketControllerType>;
-export type { SocketControllerType, ISocketController };
+export type { SocketControllerType, ISocketController, IWebSocket };

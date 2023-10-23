@@ -1,5 +1,3 @@
-import { INext, IReq, IRes } from './resHandler';
-
 export default function async() {
     // The target will controllers
     // which gets req, res and next
@@ -8,9 +6,9 @@ export default function async() {
         const originalMethod = descriptor.value;
         descriptor.value = async function (
             this: unknown,
-            req: IReq,
-            res: IRes,
-            next: INext
+            req: unknown,
+            res: unknown,
+            next: (err: unknown) => void
         ) {
             try {
                 await originalMethod.apply(this, [req, res, next]);

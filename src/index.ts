@@ -46,6 +46,9 @@ const SocketController = defineSocketController({
     logger,
     models
 });
+SocketController.registerHandler('TEST', function (payload, ws, next) {
+    ws.send(JSON.stringify(payload));
+});
 
 const wsRouter = new WSWebsocket({
     logger,
