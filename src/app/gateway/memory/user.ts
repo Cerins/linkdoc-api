@@ -1,3 +1,13 @@
+/*
+    Memory Gateway was a fun experiment, but it's not really useful in a real
+    It showcased how easy it swap outside data sources, by splitting the data across
+    source, gateway and model.
+    This was abandoned in favor of sqlite gateways, which are are also useful for testing
+    Since sqlite offers a RAM mode, so sqlite gateway can also be used for testing.
+
+    As of writing this in 24.10.2023, the real solution will either use sqlite or mongodb
+    with either redis or memory cache.
+*/
 import { IUserGateway } from '../interface/user';
 
 class User implements IUserGateway {
@@ -43,6 +53,10 @@ class User implements IUserGateway {
 
     public set password(value: string) {
         this.#password = value;
+    }
+
+    public async getCollections() {
+        return [];
     }
 
     public link(properties: {
