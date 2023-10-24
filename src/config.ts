@@ -10,6 +10,11 @@ const schema = z.object({
             User: z.object({
                 saltRounds: z.number()
             })
+        }),
+        source: z.object({
+            sqlite: z.object({
+                filename: z.string()
+            })
         })
     }),
     controllers: z.object({}),

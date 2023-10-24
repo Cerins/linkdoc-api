@@ -1,59 +1,69 @@
-import { Database } from 'sqlite3';
 import ILogger from './interface/logger';
+import knex, { Knex } from 'knex';
 
 interface Config {
-    filename: string | ':memory:';
+  filename: string | ':memory:';
 }
 
 interface Dependencies {
-    config: Config;
-    logger: ILogger;
+  config: Config;
+  logger: ILogger;
 }
 
 async function buildDB(dependencies: Dependencies, upScripts?: string[]) {
     const { filename } = dependencies.config;
-    const db = await new Promise<Database>((resolve, reject) => {
-        const dbInner = new Database(filename, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(dbInner);
+    // Setup knex with sqlite3
+    const db = knex({
+        client: 'sqlite3',
+        connection: {
+            filename
+        },
+        log: {
+            warn(message) {
+                dependencies.logger.log('info', 'SQLITE WARN', {
+                    message
+                });
+            },
+            error(message) {
+                dependencies.logger.log('error', 'SQLITE ERROR', {
+                    message
+                });
+            },
+            deprecate(message) {
+                dependencies.logger.log('warn', 'SQLITE DEPRECATE', {
+                    message
+                });
+            },
+            debug(message) {
+                dependencies.logger.log('info', 'SQLITE DEBUG', {
+                    message
+                });
+            }
+        }
+
+    });
+    db.on('query', (query) => {
+        dependencies.logger.log('info', 'SQLITE QUERY', {
+            query: {
+                method: query.method,
+                sql: query.sql
+                // Do not want to see this this is potentially sensitive
+                // bindings: query.bindings
+                // Or in other words: "speak no evil"
             }
         });
     });
-    if (upScripts !== undefined && upScripts.length > 0) {
-    // Run all scripts in sequence complete with error handling
-        await new Promise((resolve, reject) => {
-            db.serialize(() => {
-                let completedScripts = 0;
-                for (const script of upScripts) {
-                    db.run(script, (err) => {
-                        if (err) {
-                            reject(err);
-                            return;
-                        }
-                        completedScripts++;
-                        if (completedScripts === upScripts.length) {
-                            resolve(undefined);
-                        }
-                    });
-                }
-            });
-        });
+    // Run setup scripts
+    if (upScripts && upScripts.length > 0) {
+        for (const script of upScripts) {
+            await db.raw(script);
+        }
     }
     return db;
 }
 
-async function closeDB(db: Database) {
-    await new Promise((resolve, reject) => {
-        db.close((err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(undefined);
-            }
-        });
-    });
+async function closeDB(db: Knex) {
+    await db.destroy();
 }
 
 export { buildDB, closeDB };

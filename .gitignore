@@ -1,5 +1,6 @@
 node_modules/
 build/
+misc/
 # Hide the configs
 src/config/development.ts
 src/config/production.ts

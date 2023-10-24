@@ -1,5 +1,4 @@
 import defineUser from './app/model/user';
-import UserMemoryGateway from './app/gateway/memory/user';
 import ExpressAPI from './routes/http/express';
 import defineHTTPUserController from './controllers/http/user';
 import createLogger from './utils/logger';
@@ -8,37 +7,32 @@ import WSWebsocket from './routes/websocket/ws';
 import defineSocketController from './controllers/websocket';
 import { buildDB } from './utils/sqlite';
 import sqliteSetupScripts from './app/gateway/sqlite/setup';
+import defineUserGateway from './app/gateway/sqlite/user';
 
 async function main() {
     const logger = createLogger();
-    const db = await buildDB({
-        config: {
-            filename: config.app.gateway.sqlite.filename
+    const db = await buildDB(
+        {
+            config: config.app.source.sqlite,
+            logger
         },
-        logger
-    }, sqliteSetupScripts);
-    const models = {
-        User: defineUser(
-            {
-                UserGateway: UserMemoryGateway
-            },
-            {
-                saltRounds: config.app.model.User.saltRounds
-            }
-        )
+        sqliteSetupScripts
+    );
+    const GateWays = {
+        UserGateway: defineUserGateway({
+            db
+        })
     };
-
-    // Register a user for testing
-    // TODO - Remove this
-    models.User.register('username', 'password');
-
-
+    const models = {
+        User: defineUser(GateWays, {
+            saltRounds: config.app.model.User.saltRounds
+        })
+    };
     const controllers = {
         HTTPUserController: defineHTTPUserController({
             models
         })
     };
-
     const httpRouter = new ExpressAPI({
         controllers,
         logger,
@@ -46,7 +40,6 @@ async function main() {
             port: config.routes.http.port
         }
     });
-
     // TODO - Setup config
     const SocketController = defineSocketController({
         config: {

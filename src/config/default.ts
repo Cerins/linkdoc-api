@@ -7,6 +7,12 @@ export = {
                     // How many rounds of salt to use when hashing passwords
                     saltRounds: 10
                 }
+            },
+            source: {
+                sqlite: {
+                    // The filename of the sqlite database or :memory: to use in-memory
+                    filename: ':memory:'
+                }
             }
         },
         controllers: {},

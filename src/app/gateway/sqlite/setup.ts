@@ -8,7 +8,7 @@ const sqliteTableSetup = [
     `
         CREATE TABLE IF NOT EXISTS User (
             usrID INTEGER PRIMARY KEY,
-            usrName TEXT NOT NULL,
+            usrName TEXT NOT NULL UNIQUE,
             usrPassword TEXT NOT NULL,
             usrCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             usrUpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -26,11 +26,11 @@ const sqliteTableSetup = [
 ];
 
 
-const sqliteUserSetup = [
-    `
-        INSERT INTO User (usrName, usrPassword)
-        VALUES ("username", "password");
-    `
+const sqliteUserSetup: string[] = [
+    // `
+    //     INSERT INTO User (usrName, usrPassword)
+    //     VALUES ("username", "password");
+    // `
 ];
 
 const sqliteSetupScripts = [
