@@ -4,7 +4,7 @@ import defineHTTPUserController from './controllers/http/user';
 import createLogger from './utils/logger';
 import config from './config';
 import WSWebsocket from './routes/websocket/ws';
-import defineSocketController from './controllers/websocket';
+import defineSocketController, { ISocketController } from './controllers/websocket';
 import { buildDB } from './utils/sqlite';
 import sqliteSetupScripts from './app/gateway/sqlite/setup';
 import defineUserGateway from './app/gateway/sqlite/user';
@@ -48,8 +48,17 @@ async function main() {
         logger,
         models
     });
-    SocketController.registerHandler('TEST', function (payload, ws, next) {
-        ws.send(JSON.stringify(payload));
+    SocketController.registerHandler('TEST', function (
+        this: ISocketController,
+        payload, ws, next) {
+        const full = {
+            user: {
+                name: this.user.name,
+                id: this.user.id,
+                says: payload
+            }
+        };
+        ws.send(JSON.stringify(full));
     });
 
     const wsRouter = new WSWebsocket({

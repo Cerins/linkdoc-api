@@ -2,11 +2,11 @@ import { z } from 'zod';
 import ResponseHelper, { IReq, IRes } from './utils/resHandler';
 import async from './utils/handlePromise';
 import JWT from '../../utils/jwt';
-import { IUser } from '../../app/model/interface/user';
+import { IUserType } from '../../app/model/interface/user';
 
 interface Dependencies {
   models: {
-    User: IUser;
+    User: IUserType;
   };
 }
 

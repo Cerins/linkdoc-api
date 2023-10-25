@@ -1,6 +1,16 @@
-type OnlyPrimitiveValues<T> = {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  [K in keyof T]?: T[K] extends Function ? never : T[K];
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// type OnlyPrimitiveValues<T> = {
+//     [K in keyof T]: T[K] extends (...args: any[]) => any ? never : T[K];
+// };
+
+type MakeAllOptional<T> = {
+    [P in keyof T]?: T[P];
 };
 
-export type { OnlyPrimitiveValues };
+type NonFunctionKeys<T> = {
+    [K in keyof T]: T[K] extends (...args: any[]) => any ? never : K;
+}[keyof T];
+
+type OnlyPrimitiveValues<T> = Pick<T, NonFunctionKeys<T>>;
+
+export type { OnlyPrimitiveValues, MakeAllOptional };

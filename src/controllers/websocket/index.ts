@@ -1,5 +1,5 @@
 import type ILogger from '../../utils/interface/logger';
-import { IUser } from '../../app/model/interface/user';
+import { IUser, IUserType } from '../../app/model/interface/user';
 import JWT from '../../utils/jwt';
 import { z } from 'zod';
 import type { HandlerFn } from './handlers';
@@ -42,7 +42,7 @@ interface Dependencies {
   };
   logger: ILogger;
   models: {
-    User: IUser;
+    User: IUserType;
   };
 }
 
@@ -68,8 +68,11 @@ export default function defineSocketController(dependencies: Dependencies) {
 
         protected ws: IWebSocket;
 
-        public constructor(ws: IWebSocket) {
+        protected user: IUser;
+
+        public constructor(ws: IWebSocket, user: IUser) {
             this.ws = ws;
+            this.user = user;
         }
 
         public connect() {
@@ -139,10 +142,10 @@ export default function defineSocketController(dependencies: Dependencies) {
             }
             socket.on('error', SocketController.onError);
             auth()
-                .then(() => {
+                .then((user) => {
                     socket.removeListener('error', SocketController.onError);
                     this.handleUpgrade(request, socket, head, (ws) => {
-                        const socketController = new SocketController(ws);
+                        const socketController = new SocketController(ws, user);
                         this.emit('connection', socketController);
                     });
                 })

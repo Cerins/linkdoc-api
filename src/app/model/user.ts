@@ -15,16 +15,18 @@ function defineUser(dependencies: Dependencies, config?: Config) {
     const { UserGateway } = dependencies;
 
     class User {
-        public name: string;
-        public password: string;
-        public id: string;
         private user: IUserGateway;
 
         private constructor(user: IUserGateway) {
             this.user = user;
-            this.id = user.id;
-            this.name = user.name;
-            this.password = user.password;
+        }
+
+        public get id() {
+            return this.user.id;
+        }
+
+        public get name() {
+            return this.user.name;
         }
 
         public async delete() {
@@ -41,7 +43,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
         }
 
         validatePassword(password: string) {
-            return User.compare(password, this.password);
+            return User.compare(password, this.user.password);
         }
 
         static async register(name: string, password: string) {

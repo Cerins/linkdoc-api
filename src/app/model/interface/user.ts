@@ -1,14 +1,17 @@
 interface IUser {
+    id: string;
+    name: string;
+    validatePassword(password: string): Promise<boolean>;
+}
+
+interface IUserType {
     find(properties: {
         id?: string;
         name?: string;
-    }): Promise<{
-        id: string;
-        name: string;
-        validatePassword(password: string): Promise<boolean>;
-    } | undefined>;
+    }): Promise<IUser | undefined>;
 }
 
 export type {
+    IUserType,
     IUser
 };
