@@ -34,7 +34,7 @@ function defineHTTPUserController(dependencies: Dependencies) {
         static async login(req: IReq, res: IRes, next: unknown) {
             const { User } = dependencies.models;
             const { username, password } = loginBodySchema.parse(req.body);
-            const user = await User.find({
+            const user = await User.findOne({
                 name: username
             });
             if (!user) {

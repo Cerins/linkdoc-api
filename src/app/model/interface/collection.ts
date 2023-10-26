@@ -1,15 +1,19 @@
-interface ICollection {
-    find(properties: {
-        id?: string;
+import { ICollectionGateway } from '../../gateway/interface/collection';
 
-    }): Promise<{
-        id: string;
-        name: string;
-        usrID: string;
-        hasAccess(usrID: string): Promise<boolean>;
-    }>
+interface ICollection {
+    id: string;
+    name: string;
+    userID: string;
+    hasAccess(usrID: string): Promise<boolean>;
+}
+interface ICollectionType {
+    findOne(properties: {
+        id?: string;
+    }): Promise<ICollection | undefined>
+    new (collection: ICollectionGateway): ICollection
 }
 
 export type {
+    ICollectionType,
     ICollection
 };

@@ -29,7 +29,7 @@ const sqliteTableSetup = [
             REFERENCES User(usrID)
                 ON UPDATE CASCADE
                 ON DELETE CASCADE,
-            UNIQUE(colName, colID)
+            UNIQUE(colName, col_usrID)
         );
     `,
     `
@@ -37,26 +37,25 @@ const sqliteTableSetup = [
     `,
     `
         CREATE INDEX IF NOT EXISTS idx_col_usrID ON Collection(col_usrID);
+    `,
     `
-
-    // `
-    //     CREATE TABLE IF ONT EXISTS UserCollection (
-    //         uclID INTEGER PRIMARY KEY,
-    //         ucl_usrID INTEGER NOT NULL
-    //         ucl_colID INTEGER NOT NULL
-    //         uclCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    //         uclUpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    //         FOREIGN KEY (ucl_usrID)
-    //         REFERENCES User(usrID)
-    //             ON UPDATE CASCADE
-    //             ON DELETE CASCADE,
-    //         FOREIGN KEY (ucl_colID)
-    //         REFERENCES Collection(colID)
-    //             ON UPDATE CASCADE
-    //             ON DELETE CASCADE,
-
-    //     )
-    // `
+        CREATE TABLE IF NOT EXISTS UserCollection (
+            uclID INTEGER PRIMARY KEY,
+            ucl_usrID INTEGER NOT NULL,
+            ucl_colID INTEGER NOT NULL,
+            uclCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            uclVisibility TINYINT NOT NULL,
+            FOREIGN KEY (ucl_usrID)
+            REFERENCES User(usrID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            FOREIGN KEY (ucl_colID)
+            REFERENCES Collection(colID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            UNIQUE(ucl_usrID, ucl_colID)
+        )
+    `
 ];
 
 

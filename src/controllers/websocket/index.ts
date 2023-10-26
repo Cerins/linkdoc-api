@@ -134,7 +134,7 @@ export default function defineSocketController(dependencies: Dependencies) {
                 }
                 const jwt = JWT.validate(token);
                 const { User } = dependencies.models;
-                const user = await User.find({ id: jwt.get<string>('usrID') });
+                const user = await User.findOne({ id: jwt.get<string>('usrID') });
                 if (!user) {
                     throw new Error('User not found');
                 }

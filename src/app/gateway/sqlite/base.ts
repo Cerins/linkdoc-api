@@ -57,11 +57,14 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
               if (logical === 'id') {
                   return;
               }
-              fullRecord[physical as any] = (this as any)[logical];
+              const item = this._data.get(logical as any);
+              if(item !== undefined) {
+                  fullRecord[physical as any] = item;
+              }
           });
           if (cid === undefined) {
               const id = await db(tableName).insert(fullRecord);
-              (this as any).id = id;
+              (this as any).id = id[0].toString();
           } else {
               const physicalID = (physicalNames as any)['id'];
               await db(tableName)
@@ -114,8 +117,8 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
     link(): void;
   }
   return Base as unknown as {
-    new (): FullT;
-    findAll(queryParams?: { where?: AllOptionalB }): Promise<FullT[]>;
-    findOne(queryParams?: { where?: AllOptionalB }): Promise<FullT | undefined>;
+    new (): T;
+    findAll(queryParams?: { where?: AllOptionalB }): Promise<T[]>;
+    findOne(queryParams?: { where?: AllOptionalB }): Promise<T | undefined>;
   };
 }

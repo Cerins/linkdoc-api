@@ -10,7 +10,7 @@ const usrInfo = {
 describe('User tests', () => {
     const User = defineUser(
         {
-            UserGateway: UserMemoryGateway
+            User: UserMemoryGateway
         },
         {
             saltRounds: 1
@@ -22,7 +22,7 @@ describe('User tests', () => {
     });
     test('Trying to login with wrong password throws an error', async () => {
         await User.register(usrInfo.name, usrInfo.password);
-        const usr = await User.find({
+        const usr = await User.findOne({
             name: usrInfo.name
         });
         expect(usr).toBeDefined();
@@ -31,7 +31,7 @@ describe('User tests', () => {
     test('Can register a new user', async () => {
         const a = await User.register(usrInfo.name, usrInfo.password);
         expect(a.name).toBe(usrInfo.name);
-        const b = await User.find(
+        const b = await User.findOne(
             {
                 name: usrInfo.name
             }
