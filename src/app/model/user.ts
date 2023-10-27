@@ -95,7 +95,6 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             collectionRef.visibility = ColVisibility.PRIVATE;
             collectionRef.name = name;
             await collectionRef.save();
-            console.log(this.dependencies);
             return new this.dependencies.model.Collection(collectionRef);
         }
     }

@@ -5,6 +5,8 @@ interface ICollection {
     name: string;
     userID: string;
     hasAccess(usrID: string): Promise<boolean>;
+    setAccess(usrID: string, visibility: ColVisibility): Promise<void>
+    setVisibility(visibility: ColVisibility): Promise<void>
 }
 interface ICollectionType {
     findOne(properties: {

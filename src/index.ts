@@ -11,10 +11,10 @@ import defineUserGateway from './app/gateway/sqlite/user';
 import defineCollectionGateway from './app/gateway/sqlite/collection';
 import defineUserCollectionGateway from './app/gateway/sqlite/userCollection';
 import { UserGatewayType } from './app/gateway/interface/user';
-import { CollectionGatewayType } from './app/gateway/interface/collection';
+import { ColVisibility, CollectionGatewayType } from './app/gateway/interface/collection';
 import { UserCollectionGatewayType } from './app/gateway/interface/userCollection';
 import { Knex } from 'knex';
-import { IUser, IUserType } from './app/model/interface/user';
+import { IUserType } from './app/model/interface/user';
 import { ICollectionType } from './app/model/interface/collection';
 import defineCollection from './app/model/collection';
 
@@ -47,7 +47,9 @@ class Models {
         }, {
             saltRounds: config.app.model.User.saltRounds
         }),
-        this.Collection = defineCollection(gateways);
+        this.Collection = defineCollection({
+            gateway: gateways
+        });
     }
 }
 
@@ -104,6 +106,11 @@ async function main() {
             SocketController
         }
     });
+    const collection = await models.Collection.findOne({
+        id: '1'
+    });
+    await collection!.setVisibility(ColVisibility.READ);
+    await collection!.setAccess('2', ColVisibility.WRITE);
     await httpRouter.start();
     await wsRouter.start();
 }

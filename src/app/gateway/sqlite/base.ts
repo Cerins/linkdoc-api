@@ -52,6 +52,10 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
 
       public async save() {
           const cid = this._data.get('id' as any);
+          // TODO It should noted, that update sets every field
+          // This is not optimal, even if the sql server ignores unneeded changes
+          // still more useless bytes are transferred over the network
+          // I should update this class so that is saves which fields where updated or set
           const fullRecord: Record<string, unknown> = {};
           Object.entries(physicalNames).forEach(([logical, physical]) => {
               if (logical === 'id') {
@@ -69,7 +73,7 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
               const physicalID = (physicalNames as any)['id'];
               await db(tableName)
                   .where({
-                      [physicalID]: this as any
+                      [physicalID]: cid
                   })
                   .update(fullRecord);
           }
@@ -81,6 +85,18 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
           });
       }
 
+      // TODO currently all fields are returned
+      // Why?
+      // I mean if there would be no need to write additional code, then field select is preferable
+      // Since it decreases the constraint on the db
+      // Furthermore the sql server can do optimizations
+      // Queries that only look at certain fields can be optimized quite better
+      // than queries which receive a full dataset
+      // So in the future please fix this
+      // by the ability of passing the set of interested fields,
+      // they should be logical and would be under queryParams
+      // like so { where: {....}, attributes: new Set()}
+      // thanks
       public static async findAll(queryParams?: { where: AllOptionalB }) {
           let query = db(tableName);
           Object.entries(queryParams?.where ?? {}).forEach(([key, val]) => {
@@ -102,7 +118,8 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
               return item;
           });
       }
-
+      // TODO theoretically this should  execute a different query
+      // since getting the entire selection and then discarding is stupid
       public static async findOne(queryParams?: { where: AllOptionalB }) {
           const items = await this.findAll(queryParams);
           if (items.length === 0) {
