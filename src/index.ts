@@ -5,65 +5,19 @@ import createLogger from './utils/logger';
 import config from './config';
 import WSWebsocket from './routes/websocket/ws';
 import defineSocketController, { ISocketController } from './controllers/websocket';
-import { buildDB } from './utils/sqlite';
-import sqliteSetupScripts from './app/gateway/sqlite/setup';
-import defineUserGateway from './app/gateway/sqlite/user';
-import defineCollectionGateway from './app/gateway/sqlite/collection';
-import defineUserCollectionGateway from './app/gateway/sqlite/userCollection';
-import { UserGatewayType } from './app/gateway/interface/user';
-import { ColVisibility, CollectionGatewayType } from './app/gateway/interface/collection';
-import { UserCollectionGatewayType } from './app/gateway/interface/userCollection';
-import { Knex } from 'knex';
 import { IUserType } from './app/model/interface/user';
 import { ICollectionType } from './app/model/interface/collection';
 import defineCollection from './app/model/collection';
+import SQLiteGateways from './app/gateway/sqlite';
+import Models from './app/model';
 
-class Gateways {
-    User: UserGatewayType;
-    Collection: CollectionGatewayType;
-    UserCollection: UserCollectionGatewayType;
-    constructor(db: Knex) {
-
-        this.User = defineUserGateway({
-            db
-        });
-        this.Collection = defineCollectionGateway({
-            db
-        }),
-        this.UserCollection = defineUserCollectionGateway({
-            db
-        });
-    }
-}
-
-class Models {
-    User: IUserType;
-    Collection: ICollectionType;
-
-    constructor(gateways: Gateways) {
-        this.User = defineUser({
-            gateway: gateways,
-            model: this
-        }, {
-            saltRounds: config.app.model.User.saltRounds
-        }),
-        this.Collection = defineCollection({
-            gateway: gateways
-        });
-    }
-}
 
 async function main() {
     const logger = createLogger();
-    const db = await buildDB(
-        {
-            config: config.app.source.sqlite,
-            logger
-        },
-        sqliteSetupScripts
-    );
-    const gateways = new Gateways(db);
-    const models = new Models(gateways);
+    const gateway = await SQLiteGateways.create(logger);
+    const models = new Models({
+        gateway: gateway
+    });
     const controllers = {
         HTTPUserController: defineHTTPUserController({
             models
@@ -106,11 +60,6 @@ async function main() {
             SocketController
         }
     });
-    const collection = await models.Collection.findOne({
-        id: '1'
-    });
-    await collection!.setVisibility(ColVisibility.READ);
-    await collection!.setAccess('2', ColVisibility.WRITE);
     await httpRouter.start();
     await wsRouter.start();
 }

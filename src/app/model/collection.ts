@@ -48,8 +48,8 @@ export default function defineCollection(dependencies: Dependencies) {
             return this.collection.description;
         }
 
-        public async hasAccess(usrID: string) {
-            return this.collection.hasAccess(usrID);
+        public async hasAccessLevel(level: ColVisibility, usrID?: string) {
+            return this.collection.hasAccessLevel(level, usrID);
         }
 
         public async setVisibility(visibility: ColVisibility) {

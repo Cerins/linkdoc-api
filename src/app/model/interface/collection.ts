@@ -1,10 +1,10 @@
-import { ICollectionGateway } from '../../gateway/interface/collection';
+import { ColVisibility, ICollectionGateway } from '../../gateway/interface/collection';
 
 interface ICollection {
     id: string;
     name: string;
     userID: string;
-    hasAccess(usrID: string): Promise<boolean>;
+    hasAccessLevel(level: ColVisibility, usrID?: string): Promise<boolean>;
     setAccess(usrID: string, visibility: ColVisibility): Promise<void>
     setVisibility(visibility: ColVisibility): Promise<void>
 }

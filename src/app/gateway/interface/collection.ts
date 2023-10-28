@@ -15,7 +15,7 @@ interface ICollectionGateway extends IObjectGateway {
         createdAt: Date;
         userID: string;
         visibility: ColVisibility
-        hasAccess(usrID: string): Promise<boolean>;
+        hasAccessLevel(level: ColVisibility, usrID?: string): Promise<boolean>;
 }
 
 interface CollectionGatewayType

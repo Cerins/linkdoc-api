@@ -1,5 +1,6 @@
-import UserMemoryGateway from '../../../app/gateway/memory/user';
-import defineUser from '../../../app/model/user';
+import SQLiteGateways from '../../../app/gateway/sqlite';
+import Models from '../../../app/model';
+import { IUserType } from '../../../app/model/interface/user';
 import { describe, test, expect, beforeEach } from 'vitest';
 
 const usrInfo = {
@@ -7,18 +8,17 @@ const usrInfo = {
     password: 'usrPassword'
 };
 
-describe('User tests', () => {
-    const User = defineUser(
-        {
-            User: UserMemoryGateway
-        },
-        {
-            saltRounds: 1
-        }
-    );
+describe('User', () => {
+    let User!: IUserType;
     beforeEach(async () => {
-        const users = await UserMemoryGateway.findAll();
-        await Promise.all(users.map((user) => user.delete()));
+        const gateway = await SQLiteGateways.create({
+            log: () => {}
+        });
+        const models = new Models({
+            gateway
+        });
+        // eslint-disable-next-line prefer-destructuring
+        User = models.User;
     });
     test('Trying to login with wrong password throws an error', async () => {
         await User.register(usrInfo.name, usrInfo.password);
@@ -31,11 +31,9 @@ describe('User tests', () => {
     test('Can register a new user', async () => {
         const a = await User.register(usrInfo.name, usrInfo.password);
         expect(a.name).toBe(usrInfo.name);
-        const b = await User.findOne(
-            {
-                name: usrInfo.name
-            }
-        );
+        const b = await User.findOne({
+            name: usrInfo.name
+        });
         expect(b).toBeDefined();
         expect(b!.name).toBe(usrInfo.name);
         expect(b!.id).toBe(a.id);
