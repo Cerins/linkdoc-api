@@ -1,13 +1,9 @@
-import defineUser from './app/model/user';
 import ExpressAPI from './routes/http/express';
 import defineHTTPUserController from './controllers/http/user';
 import createLogger from './utils/logger';
 import config from './config';
 import WSWebsocket from './routes/websocket/ws';
 import defineSocketController, { ISocketController } from './controllers/websocket';
-import { IUserType } from './app/model/interface/user';
-import { ICollectionType } from './app/model/interface/collection';
-import defineCollection from './app/model/collection';
 import SQLiteGateways from './app/gateway/sqlite';
 import Models from './app/model';
 

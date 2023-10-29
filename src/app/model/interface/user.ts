@@ -12,7 +12,7 @@ interface IUserType {
         id?: string;
         name?: string;
     }): Promise<IUser | undefined>;
-    register(name: string, password:stirng): Promise<IUser>
+    register(name: string, password:string): Promise<IUser>
 }
 
 export type {

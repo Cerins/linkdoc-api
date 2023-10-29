@@ -53,6 +53,7 @@ const messageSchema = z.object({
 
 export default function defineSocketController(dependencies: Dependencies) {
     const { logger } = dependencies;
+    type OnComplete = (err: Error | null, user: IUser | undefined)=>void;
     return class SocketController {
         protected static onMessageHandlers = new Map<string, HandlerFn>();
 
@@ -114,13 +115,16 @@ export default function defineSocketController(dependencies: Dependencies) {
                 err
             });
         }
-
         public static onUpgrade(
             this: IWebSocketServer,
             request: IRequest,
             socket: ISocket,
-            head: unknown
+            head: unknown,
+            onComplete?: OnComplete
         ) {
+            if(onComplete === undefined) {
+                onComplete = ()=>{};
+            }
             async function auth() {
                 const { url } = request;
                 if (!url) {
@@ -142,14 +146,19 @@ export default function defineSocketController(dependencies: Dependencies) {
             }
             socket.on('error', SocketController.onError);
             auth()
-                .then((user) => {
+                .then((user: IUser) => {
                     socket.removeListener('error', SocketController.onError);
+                    onComplete!(
+                        null,
+                        user
+                    );
                     this.handleUpgrade(request, socket, head, (ws) => {
                         const socketController = new SocketController(ws, user);
                         this.emit('connection', socketController);
                     });
                 })
                 .catch((err) => {
+                    onComplete!(err, undefined);
                     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                     socket.destroy();
                     logger.log('error', 'Socket authentication failed', {
@@ -163,4 +172,5 @@ export default function defineSocketController(dependencies: Dependencies) {
 type SocketControllerType = ReturnType<typeof defineSocketController>;
 // Get the instance type
 type ISocketController = InstanceType<SocketControllerType>;
-export type { SocketControllerType, ISocketController, IWebSocket };
+export type { SocketControllerType, ISocketController, IWebSocket, ISocket, IWebSocketServer };
+
