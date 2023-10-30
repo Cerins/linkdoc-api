@@ -55,6 +55,25 @@ const sqliteTableSetup = [
                 ON DELETE CASCADE,
             UNIQUE(ucl_usrID, ucl_colID)
         )
+    `,
+    `
+        CREATE TABLE IF NOT EXISTS Document (
+            docID INTEGER PRIMARY KEY,
+            docName TEXT NOT NULL,
+            docText TEXT NOT NULL,
+            doc_colID INTERGER NOT NULL,
+            FOREIGN KEY (doc_colID)
+            REFERENCES Collection(colID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            UNIQUE(docName, doc_colID)
+        )
+    `,
+    `
+        CREATE INDEX IF NOT EXISTS idx_doc_colID on Document(doc_colID);
+    `,
+    `
+        CREATE INDEX IF NOT EXISTS idx_docName on Document(docName);
     `
 ];
 

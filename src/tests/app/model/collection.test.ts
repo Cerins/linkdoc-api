@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import Models from '../../../app/model';
 import SQLiteGateways from '../../../app/gateway/sqlite';
 import { ColVisibility } from '../../../app/gateway/interface/collection';
+import async from '../../../controllers/http/utils/handlePromise';
 
 const usrName = 'name';
 const usrPassword = 'password';
@@ -10,6 +11,10 @@ const guestName = 'guest';
 const guestPassword = 'pass';
 
 const colName = 'col';
+const othColName = 'not-col';
+
+const docName = 'doc';
+const othDocName = 'not-doc';
 
 describe('Collection', () => {
     let models: Models;
@@ -211,6 +216,43 @@ describe('Collection', () => {
                 );
                 expect(hasAccess).toBe(true);
             });
+        });
+    });
+    describe('findDocument', ()=>{
+        test('Return undefined if no document', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            const doc = await collection.findDocument(docName);
+            expect(doc).toBe(undefined);
+        });
+        test('Return document if document exists', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            const docOg = await collection.createDocument(docName);
+            const doc = await collection.findDocument(docName);
+            expect(doc).not.toBe(undefined);
+            expect(doc!.id).toBe(docOg.id);
+        });
+        test('Return undefined if document on other collection', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            const collectionOth = await user.createCollection(othColName);
+            const docOg = await collectionOth.createDocument(docName);
+            const doc = await collection.findDocument(docName);
+            expect(doc).toBe(undefined);
+        });
+    });
+    describe('createDocument', ()=>{
+        test('Throw error on duplicate', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            await collection.createDocument(docName);
+            expect.assertions(1);
+            try{
+                await collection.createDocument(docName);
+            }catch(err){
+                expect(err).toBeInstanceOf(Error);
+            }
         });
     });
 });

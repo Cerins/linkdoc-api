@@ -9,6 +9,8 @@ import config from '../../../config';
 import ILogger from '../../../utils/interface/logger';
 import { buildDB } from '../../../utils/sqlite';
 import sqliteSetupScripts from './setup';
+import { DocumentGatewayType } from '../interface/document';
+import defineDocumentGateway from './document';
 
 // Create a collection of gateways that use SQLite
 // Because this is a preset i do not see the damage of
@@ -17,16 +19,20 @@ export default class SQLiteGateways {
     User: UserGatewayType;
     Collection: CollectionGatewayType;
     UserCollection: UserCollectionGatewayType;
+    Document: DocumentGatewayType;
     constructor(db: Knex) {
         this.User = defineUserGateway({
             db
         });
-        (this.Collection = defineCollectionGateway({
+        this.Collection = defineCollectionGateway({
             db
-        })),
-        (this.UserCollection = defineUserCollectionGateway({
+        }),
+        this.UserCollection = defineUserCollectionGateway({
             db
-        }));
+        });
+        this.Document = defineDocumentGateway({
+            db
+        });
     }
     public static async create(logger: ILogger) {
         const db = await buildDB(

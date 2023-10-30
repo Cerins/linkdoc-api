@@ -1,7 +1,6 @@
 import { Knex } from 'knex';
-import { IUserGateway, UserGatewayType } from '../interface/user';
+import { IUserGateway } from '../interface/user';
 import defineBaseGateway from './base';
-import { ICollectionGateway } from '../interface/collection';
 interface Dependencies {
   db: Knex;
 }

@@ -1,15 +1,21 @@
-import {
+import type {
     ColVisibility,
     CollectionGatewayType,
     ICollectionGateway
 } from '../gateway/interface/collection';
-import { UserCollectionGatewayType } from '../gateway/interface/userCollection';
-import { ICollection } from './interface/collection';
+import { DocumentGatewayType } from '../gateway/interface/document';
+import type { UserCollectionGatewayType } from '../gateway/interface/userCollection';
+import type { ICollection } from './interface/collection';
+import type { IDocumentType } from './interface/document';
 
 interface Dependencies {
     gateway: {
         Collection: CollectionGatewayType
         UserCollection: UserCollectionGatewayType
+        Document: DocumentGatewayType
+    },
+    model: {
+        Document: IDocumentType
     }
 }
 export default function defineCollection(dependencies: Dependencies) {
@@ -94,6 +100,26 @@ export default function defineCollection(dependencies: Dependencies) {
             if(item === undefined) {return undefined;}
             return new Collection(item);
         }
+
+        public async findDocument(name: string) {
+            const item = await this.dependencies.gateway.Document.findOne({
+                where: {
+                    name,
+                    collectionID: this.id
+                }
+            });
+            if(item === undefined) { return undefined; }
+            return new this.dependencies.model.Document(item);
+        }
+        public async createDocument(name: string) {
+            const item = new this.dependencies.gateway.Document();
+            item.collectionID = this.id;
+            item.name = name;
+            item.text = '';
+            await item.save();
+            return new this.dependencies.model.Document(item);
+        }
+
     }
     return Collection;
 }
