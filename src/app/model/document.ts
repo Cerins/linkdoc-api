@@ -59,8 +59,8 @@ export default function defineDocument(dependencies: Dependencies) {
             const deleteTxt = async(transform: EraseTransform)=>{
                 const { index, count }  = transform.payload;
                 const s = 0;
-                const l = index + count - 1;
-                const r = l + 1;
+                const l = index;
+                const r = l + count;
                 const e = this.document.text.length;
                 const newTxt = this.document.text.slice(s, l) + this.document.text.slice(r, e);
                 this.document.text = newTxt;
