@@ -47,7 +47,7 @@ interface Dependencies {
 }
 
 const messageSchema = z.object({
-    name: z.string(),
+    type: z.string(),
     payload: z.unknown()
 });
 
@@ -96,7 +96,7 @@ export default function defineSocketController(dependencies: Dependencies) {
             // Then check if it matches the schema
             const content = JSON.parse(data.toString());
             const message = messageSchema.parse(content);
-            const { name, payload } = message;
+            const { type: name, payload } = message;
             // Check if the handler exists
             const handler = SocketController.onMessageHandlers.get(name);
             if(!handler) {

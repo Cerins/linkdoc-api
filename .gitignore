@@ -4,3 +4,5 @@ misc/
 # Hide the configs
 src/config/development.ts
 src/config/production.ts
+# Hide the test coverage statistics
+coverage/

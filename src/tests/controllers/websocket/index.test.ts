@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import SQLiteGateways from '../../../app/gateway/sqlite';
-import defineSocketController, { ISocket, SocketControllerType } from '../../../controllers/websocket';
+import defineSocketController, {
+    SocketControllerType
+} from '../../../controllers/websocket';
 import Models from '../../../app/model';
 import JWT from '../../../utils/jwt';
 import { IUser } from '../../../app/model/interface/user';
 
 
 describe('Websocket ws controller', () => {
-    describe('onUpgprade', () => {
+    describe('onUpgrade', () => {
         const usrInfo = {
             name: 'usrName',
             password: 'usrPassword'

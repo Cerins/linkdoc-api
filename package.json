@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cd src && vitest",
+    "test": "cd src && npx vitest",
+    "test:c": "cd src && npx vitest --coverage",
     "build": "tsc",
     "start": "cd build && node index.js",
     "lint": "eslint . --ext .ts",

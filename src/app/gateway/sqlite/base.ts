@@ -128,14 +128,14 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
           return items[0];
       }
   }
-  type FullT = OnlyPrimitiveValues<T> & {
+  type FullT = T & {
     save(): Promise<void>;
     delete(): Promise<void>;
     link(): void;
   }
   return Base as unknown as {
-    new (): T;
-    findAll(queryParams?: { where?: AllOptionalB }): Promise<T[]>;
-    findOne(queryParams?: { where?: AllOptionalB }): Promise<T | undefined>;
+    new (): FullT;
+    findAll(queryParams?: { where?: AllOptionalB }): Promise<FullT[]>;
+    findOne(queryParams?: { where?: AllOptionalB }): Promise<FullT | undefined>;
   };
 }

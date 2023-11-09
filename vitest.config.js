@@ -8,6 +8,12 @@ export default {
         }
     },
     test: {
+        coverage: {
+            clean: true,
+            cleanOnRerun: true,
+            all: false,
+            reportsDirectory: '../coverage'
+        },
         exclude: [
             'node_modules',
             'build'
