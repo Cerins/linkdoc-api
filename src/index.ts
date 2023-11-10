@@ -36,7 +36,7 @@ async function main() {
     });
     SocketController.registerHandler('TEST', function (
         this: ISocketController,
-        payload, ws, next) {
+        payload, type, next) {
         const full = {
             user: {
                 name: this.user.name,
@@ -44,7 +44,7 @@ async function main() {
                 says: payload
             }
         };
-        ws.send(JSON.stringify(full));
+        this.ws.send(JSON.stringify(full));
     });
 
     const wsRouter = new WSWebsocket({

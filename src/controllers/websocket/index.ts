@@ -74,6 +74,43 @@ export default function defineSocketController(dependencies: Dependencies) {
 
         public readonly sessionID: string;
 
+        protected get models() {
+            return dependencies.models;
+        }
+
+        protected get logger() {
+            return dependencies.logger;
+        }
+
+        // This method sends the response to the current room
+        public emit(type: string, payload: unknown) {
+            this.ws.send(JSON.stringify({
+                type,
+                payload
+            }));
+        }
+
+        // This method will make sure that the session
+        // listen to all the events that happen in this room
+        public join(room: string) {
+
+        }
+
+        // This method ensures that the session leaves the room
+        public leave(room: string) {
+
+        }
+
+        // This method ensures that the the event can be sent to the room
+        public emitTo(room: string, type: string, payload: unknown) {
+
+        }
+
+        // This method ensures that the event can be sent to everyone in the room except the sender
+        public broadcastTo(room: string, type: string, payload: unknown) {
+
+        }
+
         public constructor(ws: IWebSocket, user: IUser) {
             this.ws = ws;
             this.user = user;

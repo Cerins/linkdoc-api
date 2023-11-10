@@ -9,7 +9,7 @@ interface UserGatewayType
   extends ObjectGatewayType<IUserGateway> {}
 
 
-export {
+export type {
     IUserGateway,
     UserGatewayType
 };

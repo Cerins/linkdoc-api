@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import SQLiteGateways from '../../../app/gateway/sqlite';
 import defineSocketController, {
     SocketControllerType
-} from '../../../controllers/websocket';
-import Models from '../../../app/model';
-import JWT from '../../../utils/jwt';
-import { IUser } from '../../../app/model/interface/user';
+} from '../../../../controllers/websocket';
+import JWT from '../../../../utils/jwt';
+import { IUser } from '../../../../app/model/interface/user';
+import Models from '../../../../app/model';
+import SQLiteGateways from '../../../../app/gateway/sqlite';
 
 describe('Websocket ws controller', () => {
     const usrInfo = {

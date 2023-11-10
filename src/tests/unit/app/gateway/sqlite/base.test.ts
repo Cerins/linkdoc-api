@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, vi, test, expect } from 'vitest';
-import defineBaseGateway from '../../../../app/gateway/sqlite/base';
+import defineBaseGateway from '../../../../../app/gateway/sqlite/base';
 
 const tableName = 'Test';
 const logicalID = 'id';

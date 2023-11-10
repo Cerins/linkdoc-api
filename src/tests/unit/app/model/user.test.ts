@@ -1,6 +1,6 @@
-import SQLiteGateways from '../../../app/gateway/sqlite';
-import Models from '../../../app/model';
-import { IUserType } from '../../../app/model/interface/user';
+import SQLiteGateways from '../../../../app/gateway/sqlite';
+import Models from '../../../../app/model';
+import { IUserType } from '../../../../app/model/interface/user';
 import { describe, test, expect, beforeEach } from 'vitest';
 
 const usrInfo = {

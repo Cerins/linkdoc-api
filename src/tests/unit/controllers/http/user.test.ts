@@ -1,13 +1,13 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import defineHTTPUserController, {
     IHTTPUserController
-} from '../../../controllers/http/user';
-import { ReqError } from '../../../controllers/http/utils/resHandler';
-import JWT from '../../../utils/jwt';
+} from '../../../../controllers/http/user';
+import { ReqError } from '../../../../controllers/http/utils/resHandler';
+import JWT from '../../../../utils/jwt';
 import { ZodError } from 'zod';
-import SQLiteGateways from '../../../app/gateway/sqlite';
-import Models from '../../../app/model';
-import { IUser } from '../../../app/model/interface/user';
+import SQLiteGateways from '../../../../app/gateway/sqlite';
+import { IUser } from '../../../../app/model/interface/user';
+import Models from '../../../../app/model';
 
 describe('HTTP User controller', () => {
     describe('Login', () => {
