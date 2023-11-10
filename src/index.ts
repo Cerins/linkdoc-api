@@ -10,9 +10,9 @@ import Models from './app/model';
 
 async function main() {
     const logger = createLogger();
-    const gateway = await SQLiteGateways.create(logger);
+    const gateways = await SQLiteGateways.create(logger);
     const models = new Models({
-        gateway: gateway
+        gateways
     });
     const controllers = {
         HTTPUserController: defineHTTPUserController({
@@ -32,7 +32,8 @@ async function main() {
             baseUrl: 'http://localhost:3000'
         },
         logger,
-        models
+        models,
+        gateways
     });
     SocketController.registerHandler('TEST', function (
         this: ISocketController,

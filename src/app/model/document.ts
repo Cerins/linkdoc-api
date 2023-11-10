@@ -12,7 +12,7 @@ import {
 } from './interface/document';
 
 interface Dependencies {
-    gateway: {
+    gateways: {
         Document: DocumentGatewayType
     }
 }

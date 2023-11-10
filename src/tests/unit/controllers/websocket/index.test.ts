@@ -43,9 +43,9 @@ describe('Websocket ws controller', () => {
         socketMock.removeListener.mockClear();
         webSocketMock.on.mockClear();
         webSocketMock.send.mockClear();
-        const gateway = await SQLiteGateways.create(loggerMock);
+        const gateways = await SQLiteGateways.create(loggerMock);
         const models = new Models({
-            gateway
+            gateways
         });
         user = await models.User.register(usrInfo.name, usrInfo.password);
         WSWebsocketController = defineSocketController({
@@ -53,7 +53,8 @@ describe('Websocket ws controller', () => {
                 baseUrl
             },
             models,
-            logger: loggerMock
+            logger: loggerMock,
+            gateways
         });
     });
     describe('onUpgrade', () => {

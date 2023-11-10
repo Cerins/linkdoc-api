@@ -11,12 +11,12 @@ import {
 import { UserCollectionGatewayType } from '../gateway/interface/userCollection';
 
 interface Dependencies {
-  gateway: {
+  gateways: {
     User: UserGatewayType;
     Collection: CollectionGatewayType;
     UserCollection: UserCollectionGatewayType;
   };
-  model: {
+  models: {
     Collection: ICollectionType;
   };
 }
@@ -69,7 +69,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
         }
 
         static async register(name: string, password: string) {
-            const user = new this.dependencies.gateway.User();
+            const user = new this.dependencies.gateways.User();
             user.name = name;
             user.password = await this.hash(password);
             await user.save();
@@ -77,7 +77,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
         }
 
         static async findOne({ id, name }: { id?: string; name?: string }) {
-            const user = await this.dependencies.gateway.User.findOne({
+            const user = await this.dependencies.gateways.User.findOne({
                 where: {
                     id,
                     name
@@ -90,12 +90,12 @@ function defineUser(dependencies: Dependencies, config?: Config) {
         }
 
         async createCollection(name: string) {
-            const collectionRef = new this.dependencies.gateway.Collection();
+            const collectionRef = new this.dependencies.gateways.Collection();
             collectionRef.userID = this.id;
             collectionRef.visibility = ColVisibility.PRIVATE;
             collectionRef.name = name;
             await collectionRef.save();
-            return new this.dependencies.model.Collection(collectionRef);
+            return new this.dependencies.models.Collection(collectionRef);
         }
     }
     return User;

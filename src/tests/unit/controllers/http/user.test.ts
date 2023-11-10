@@ -46,11 +46,11 @@ describe('HTTP User controller', () => {
         let user!: IUser;
         beforeEach(async () => {
             // Delete all users
-            const gateway = await SQLiteGateways.create({
+            const gateways = await SQLiteGateways.create({
                 log: loggerErrorMock
             });
             const models = new Models({
-                gateway
+                gateways
             });
             user = await models.User.register(usrInfo.name, usrInfo.password);
             HTTPUserController = defineHTTPUserController({

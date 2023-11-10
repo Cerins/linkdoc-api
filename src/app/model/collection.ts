@@ -9,12 +9,12 @@ import type { ICollection } from './interface/collection';
 import type { IDocumentType } from './interface/document';
 
 interface Dependencies {
-    gateway: {
+    gateways: {
         Collection: CollectionGatewayType
         UserCollection: UserCollectionGatewayType
         Document: DocumentGatewayType
     },
-    model: {
+    models: {
         Document: IDocumentType
     }
 }
@@ -74,14 +74,14 @@ export default function defineCollection(dependencies: Dependencies) {
             // and other sql syntax in other gateway
             // and the model will be none the wiser
             // quite the wonderful plug and play architecture
-            let usrCol = await this.dependencies.gateway.UserCollection.findOne({
+            let usrCol = await this.dependencies.gateways.UserCollection.findOne({
                 where: {
                     userID: usrID,
                     collectionID: this.id
                 }
             });
             if(usrCol === undefined) {
-                usrCol = new this.dependencies.gateway.UserCollection();
+                usrCol = new this.dependencies.gateways.UserCollection();
                 usrCol.collectionID = this.id;
                 usrCol.userID = usrID;
             }
@@ -92,7 +92,7 @@ export default function defineCollection(dependencies: Dependencies) {
         public static async findOne(properties: {
             id?: string
         }) {
-            const item = await this.dependencies.gateway.Collection.findOne({
+            const item = await this.dependencies.gateways.Collection.findOne({
                 where: {
                     id: properties.id
                 }
@@ -102,22 +102,22 @@ export default function defineCollection(dependencies: Dependencies) {
         }
 
         public async findDocument(name: string) {
-            const item = await this.dependencies.gateway.Document.findOne({
+            const item = await this.dependencies.gateways.Document.findOne({
                 where: {
                     name,
                     collectionID: this.id
                 }
             });
             if(item === undefined) { return undefined; }
-            return new this.dependencies.model.Document(item);
+            return new this.dependencies.models.Document(item);
         }
         public async createDocument(name: string) {
-            const item = new this.dependencies.gateway.Document();
+            const item = new this.dependencies.gateways.Document();
             item.collectionID = this.id;
             item.name = name;
             item.text = '';
             await item.save();
-            return new this.dependencies.model.Document(item);
+            return new this.dependencies.models.Document(item);
         }
 
     }

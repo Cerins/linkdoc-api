@@ -11,11 +11,11 @@ const usrInfo = {
 describe('User', () => {
     let User!: IUserType;
     beforeEach(async () => {
-        const gateway = await SQLiteGateways.create({
+        const gateways = await SQLiteGateways.create({
             log: () => {}
         });
         const models = new Models({
-            gateway
+            gateways
         });
         // eslint-disable-next-line prefer-destructuring
         User = models.User;

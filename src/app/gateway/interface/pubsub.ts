@@ -10,4 +10,8 @@ interface IPubSubGateway {
   unsubscribe: (room: string, id: string) => Promise<void>;
 }
 
-export type { IPubSubGateway, SubListener };
+interface PubSubGatewayType {
+  new (): IPubSubGateway;
+}
+
+export type { IPubSubGateway, SubListener, PubSubGatewayType };

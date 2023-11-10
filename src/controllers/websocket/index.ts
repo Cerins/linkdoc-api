@@ -4,6 +4,7 @@ import JWT from '../../utils/jwt';
 import { z } from 'zod';
 import type { HandlerFn } from './handlers';
 import { v4 } from 'uuid';
+import { PubSubGatewayType } from '../../app/gateway/interface/pubsub';
 
 interface ISocket {
   on(event: string, callback: (...args: unknown[]) => void): void;
@@ -45,6 +46,9 @@ interface Dependencies {
   models: {
     User: IUserType;
   };
+  gateways: {
+    PubSub: PubSubGatewayType
+  }
 }
 
 const messageSchema = z.object({
@@ -52,7 +56,37 @@ const messageSchema = z.object({
     payload: z.unknown()
 });
 
+interface MessageUnpacked {
+    origin: string,
+    message: 'emit' | 'broadcast',
+    type: string,
+    payload: unknown
+}
+
+const Message = {
+    pack: (
+        {
+            origin,
+            message,
+            type,
+            payload
+        }: MessageUnpacked
+    ) => {
+        return JSON.stringify({
+            origin,
+            message,
+            type,
+            payload
+        });
+    },
+    unpack: (packed: string) => {
+        return JSON.parse(packed) as MessageUnpacked;
+    }
+};
+
 export default function defineSocketController(dependencies: Dependencies) {
+    // Each socket controller instance should share the the same pub sub
+    const controllerPubSub = new dependencies.gateways.PubSub();
     const { logger } = dependencies;
     type OnComplete = (err: Error | null, user: IUser | undefined)=>void;
     return class SocketController {
@@ -93,22 +127,37 @@ export default function defineSocketController(dependencies: Dependencies) {
         // This method will make sure that the session
         // listen to all the events that happen in this room
         public join(room: string) {
-
+            controllerPubSub.subscribe(room, this.sessionID, (message: string)=>{
+                const { origin, message: messageType, type, payload } = Message.unpack(message);
+                if(!(messageType === 'broadcast' && origin === this.sessionID)) {
+                    this.emit(type, payload);
+                }
+            });
         }
 
         // This method ensures that the session leaves the room
         public leave(room: string) {
-
+            controllerPubSub.unsubscribe(room, this.sessionID);
         }
 
         // This method ensures that the the event can be sent to the room
-        public emitTo(room: string, type: string, payload: unknown) {
-
+        public emitRoom(room: string, type: string, payload: unknown) {
+            controllerPubSub.publish(room, Message.pack({
+                origin: this.sessionID,
+                message: 'emit',
+                type,
+                payload
+            }));
         }
 
         // This method ensures that the event can be sent to everyone in the room except the sender
-        public broadcastTo(room: string, type: string, payload: unknown) {
-
+        public broadcastRoom(room: string, type: string, payload: unknown) {
+            controllerPubSub.publish(room, Message.pack({
+                origin: this.sessionID,
+                message: 'broadcast',
+                type,
+                payload
+            }));
         }
 
         public constructor(ws: IWebSocket, user: IUser) {

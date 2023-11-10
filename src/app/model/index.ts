@@ -11,7 +11,7 @@ import type { IUserType } from './interface/user';
 import defineUser from './user';
 
 interface Dependencies {
-  gateway: {
+  gateways: {
     User: UserGatewayType;
     Collection: CollectionGatewayType;
     UserCollection: UserCollectionGatewayType;
@@ -25,22 +25,22 @@ export default class Models {
     Document: IDocumentType;
 
     constructor(dependencies: Dependencies) {
-        const { gateway } = dependencies;
+        const { gateways } = dependencies;
         this.User = defineUser(
             {
-                gateway,
-                model: this
+                gateways,
+                models: this
             },
             {
                 saltRounds: config.app.model.User.saltRounds
             }
         );
         this.Collection = defineCollection({
-            gateway,
-            model: this
+            gateways,
+            models: this
         });
         this.Document = defineDocument({
-            gateway
+            gateways
         });
     }
 }

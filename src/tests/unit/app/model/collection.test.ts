@@ -19,11 +19,11 @@ describe('Collection', () => {
     let models: Models;
 
     beforeEach(async () => {
-        const gateway = await SQLiteGateways.create({
+        const gateways = await SQLiteGateways.create({
             log: () => {}
         });
         models = new Models({
-            gateway
+            gateways
         });
     });
 

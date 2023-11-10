@@ -23,11 +23,11 @@ describe('Document', () => {
     let document: IDocument;
 
     beforeEach(async () => {
-        const gateway = await SQLiteGateways.create({
+        const gateways = await SQLiteGateways.create({
             log: () => {}
         });
         models = new Models({
-            gateway
+            gateways
         });
         const user = await models.User.register(usrName, usrPassword);
         const collection = await user.createCollection(colName);
