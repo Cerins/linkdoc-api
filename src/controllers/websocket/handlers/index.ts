@@ -3,7 +3,7 @@ import type { ISocketController, IWebSocket } from '..';
 type HandlerFn = (
     this: ISocketController,
     payload: unknown,
-    ws: IWebSocket,
+    type: string,
     next: (err: unknown) => void
 ) => void;
 

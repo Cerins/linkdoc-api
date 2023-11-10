@@ -3,6 +3,7 @@ import { IUser, IUserType } from '../../app/model/interface/user';
 import JWT from '../../utils/jwt';
 import { z } from 'zod';
 import type { HandlerFn } from './handlers';
+import { v4 } from 'uuid';
 
 interface ISocket {
   on(event: string, callback: (...args: unknown[]) => void): void;
@@ -71,9 +72,12 @@ export default function defineSocketController(dependencies: Dependencies) {
 
         protected user: IUser;
 
+        public readonly sessionID: string;
+
         public constructor(ws: IWebSocket, user: IUser) {
             this.ws = ws;
             this.user = user;
+            this.sessionID = v4();
         }
 
         public connect() {
@@ -86,24 +90,30 @@ export default function defineSocketController(dependencies: Dependencies) {
             logger.log('error', 'Socket error');
         }
 
-        protected errorMiddleware() {
-
+        protected errorMiddleware(err: unknown) {
+            logger.log('error', 'Error happened', {
+                err
+            });
         }
 
         public onMessage(data: Buffer) {
-            // First
-            // Take the data and parse it as JSON
-            // Then check if it matches the schema
-            const content = JSON.parse(data.toString());
-            const message = messageSchema.parse(content);
-            const { type: name, payload } = message;
-            // Check if the handler exists
-            const handler = SocketController.onMessageHandlers.get(name);
-            if(!handler) {
-                throw new Error('Handler not found');
+            try{
+                // First
+                // Take the data and parse it as JSON
+                // Then check if it matches the schema
+                const content = JSON.parse(data.toString());
+                const message = messageSchema.parse(content);
+                const { type, payload } = message;
+                // Check if the handler exists
+                const handler = SocketController.onMessageHandlers.get(type);
+                if(!handler) {
+                    throw new Error('No handler');
+                }
+                // Call the handler
+                handler.call(this,payload, type, this.errorMiddleware.bind(this));
+            }catch(err) {
+                this.errorMiddleware(err);
             }
-            // Call the handler
-            handler.call(this,payload, this.ws, this.errorMiddleware.bind(this));
         }
 
         public onClose() {
