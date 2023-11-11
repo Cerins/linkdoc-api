@@ -6,6 +6,7 @@ import WSWebsocket from './routes/websocket/ws';
 import defineSocketController, { ISocketController } from './controllers/websocket';
 import SQLiteGateways from './app/gateway/sqlite';
 import Models from './app/model';
+import collectionsCreate from './controllers/websocket/handlers/collections/create';
 
 
 async function main() {
@@ -35,18 +36,7 @@ async function main() {
         models,
         gateways
     });
-    SocketController.registerHandler('TEST', function (
-        this: ISocketController,
-        payload, type, next) {
-        const full = {
-            user: {
-                name: this.user.name,
-                id: this.user.id,
-                says: payload
-            }
-        };
-        this.ws.send(JSON.stringify(full));
-    });
+    SocketController.registerHandler('COLLECTIONS.CREATE', collectionsCreate);
 
     const wsRouter = new WSWebsocket({
         logger,

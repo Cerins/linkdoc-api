@@ -11,12 +11,12 @@ const colName = 'col';
 
 const docName = 'doc';
 
-// 2023.10.31 ??:?? RC: write tests for different users writting the same content
+// 2023.10.31 ??:?? RC: write tests for different users writing the same content
 // 2023.10.31 21:37 RC: this is not needed
-// ,since write to ducument is currently independent of account
-// Funnily enough some user being allowed to write is a concept that handeled by
+// ,since write to document is currently independent of account
+// Funnily enough some user being allowed to write is a concept that handled by
 // controllers
-// TODO Write tests whne OT is implemented
+// TODO Write tests when OT is implemented
 
 describe('Document', () => {
     let models: Models;

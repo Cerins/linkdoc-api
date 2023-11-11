@@ -5,7 +5,7 @@ type HandlerFn = (
     payload: unknown,
     type: string,
     next: (err: unknown) => void
-) => void;
+) => Promise<void>;
 
 
 export type { HandlerFn };

@@ -25,6 +25,11 @@ interface IWebSocket {
 // Extract the types from the
 type IRequest = {
   url?: string;
+  socket: {
+    remoteAddress?: string
+  }
+  // TODO i would like to narrow down this type even more than unknown
+  headers: Record<string, unknown>
 };
 
 interface IWebSocketServer {
@@ -84,11 +89,23 @@ const Message = {
     }
 };
 
+interface SessionInfo {
+    ip: string | null
+}
+
 export default function defineSocketController(dependencies: Dependencies) {
     // Each socket controller instance should share the the same pub sub
     const controllerPubSub = new dependencies.gateways.PubSub();
-    const { logger } = dependencies;
+    const { logger: rawLogger } = dependencies;
     type OnComplete = (err: Error | null, user: IUser | undefined)=>void;
+    /**
+     * @class SocketController
+     * Handle all the needs for a websocket server
+     * Such as creating connections on auth
+     * And manipulating connections
+     * The entire class represents the ws provider
+     * But each instance represents the individual connections
+     */
     return class SocketController {
         protected static onMessageHandlers = new Map<string, HandlerFn>();
 
@@ -104,16 +121,32 @@ export default function defineSocketController(dependencies: Dependencies) {
 
         protected ws: IWebSocket;
 
-        protected user: IUser;
+        public readonly user: IUser;
 
         public readonly sessionID: string;
 
-        protected get models() {
+        protected readonly sessionInfo?: SessionInfo;
+
+        public get models() {
             return dependencies.models;
         }
 
-        protected get logger() {
-            return dependencies.logger;
+        public get logger() {
+            // Inject all the session info for example session id
+            // and ip
+            const newLogger: ILogger = {
+                log: (level, message, meta) => {
+                    rawLogger.log(level, message, {
+                        ...(meta ?? {}),
+                        session: {
+                            id: this.sessionID,
+                            userID: this.user.id,
+                            ...(this.sessionInfo ?? {})
+                        }
+                    });
+                }
+            };
+            return newLogger;
         }
 
         // This method sends the response to the current room
@@ -160,10 +193,11 @@ export default function defineSocketController(dependencies: Dependencies) {
             }));
         }
 
-        public constructor(ws: IWebSocket, user: IUser) {
+        public constructor(ws: IWebSocket, user: IUser, sessionInfo?: SessionInfo) {
             this.ws = ws;
             this.user = user;
             this.sessionID = v4();
+            this.sessionInfo = sessionInfo;
         }
 
         public connect() {
@@ -173,11 +207,11 @@ export default function defineSocketController(dependencies: Dependencies) {
         }
 
         public onError() {
-            logger.log('error', 'Socket error');
+            this.logger.log('error', 'Socket error');
         }
 
         protected errorMiddleware(err: unknown) {
-            logger.log('error', 'Error happened', {
+            this.logger.log('error', 'Error happened', {
                 err
             });
         }
@@ -196,18 +230,21 @@ export default function defineSocketController(dependencies: Dependencies) {
                     throw new Error('No handler');
                 }
                 // Call the handler
-                handler.call(this,payload, type, this.errorMiddleware.bind(this));
+                handler.call(this,payload, type, this.errorMiddleware.bind(this))
+                    .catch(this.errorMiddleware.bind(this));
             }catch(err) {
                 this.errorMiddleware(err);
             }
         }
 
         public onClose() {
-            logger.log('info', 'Socket closed');
+            this.logger.log('info', 'Socket closed');
         }
 
-        protected static onError(err: unknown) {
-            logger.log('error', 'Socket error', {
+        protected static onError(
+            err: unknown
+        ) {
+            rawLogger.log('error', 'Socket error', {
                 err
             });
         }
@@ -249,15 +286,18 @@ export default function defineSocketController(dependencies: Dependencies) {
                         user
                     );
                     this.handleUpgrade(request, socket, head, (ws) => {
-                        const socketController = new SocketController(ws, user);
+                        const socketController = new SocketController(ws, user, {
+                            ip: request.socket.remoteAddress ?? null
+                        });
                         this.emit('connection', socketController);
                     });
                 })
                 .catch((err) => {
                     onComplete!(err, undefined);
+                    // TODO write proper JSON response
                     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
                     socket.destroy();
-                    logger.log('error', 'Socket authentication failed', {
+                    rawLogger.log('error', 'Socket authentication failed', {
                         err
                     });
                 });

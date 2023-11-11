@@ -69,6 +69,15 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
           if (cid === undefined) {
               const id = await db(tableName).insert(fullRecord);
               (this as any).id = id[0].toString();
+              // Iterate over the fields that were not set and simply state them as null
+              // TODO this causes issues with values that get defaulted by the db
+              // but currently ignore this
+              Object.entries(physicalNames).forEach(([logical]) => {
+                  const item = this._data.get(logical as any);
+                  if(item === undefined) {
+                      (this as any)[logical] = null;
+                  }
+              });
           } else {
               const physicalID = (physicalNames as any)['id'];
               await db(tableName)

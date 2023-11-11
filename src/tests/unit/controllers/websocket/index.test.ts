@@ -6,12 +6,20 @@ import JWT from '../../../../utils/jwt';
 import { IUser } from '../../../../app/model/interface/user';
 import Models from '../../../../app/model';
 import SQLiteGateways from '../../../../app/gateway/sqlite';
+import async from '../../../../controllers/http/utils/handlePromise';
+
+function createWebSocketMock() {
+    return {
+        on: vi.fn(),
+        send: vi.fn()
+    };
+}
+const usrInfo = {
+    name: 'usrName',
+    password: 'usrPassword'
+};
 
 describe('Websocket ws controller', () => {
-    const usrInfo = {
-        name: 'usrName',
-        password: 'usrPassword'
-    };
     const baseUrl = 'http://test.com';
     const loggerMock = {
         log: vi.fn()
@@ -25,12 +33,11 @@ describe('Websocket ws controller', () => {
         on: vi.fn(),
         write: vi.fn(),
         destroy: vi.fn(),
-        removeListener: vi.fn()
+        removeListener: vi.fn(),
+        headers: [],
+        remoteAddress: ''
     };
-    const webSocketMock = {
-        on: vi.fn(),
-        send: vi.fn()
-    };
+    const webSocketMock = createWebSocketMock();
     let WSWebsocketController!: SocketControllerType;
     let user!: IUser;
     beforeEach(async () => {
@@ -62,7 +69,10 @@ describe('Websocket ws controller', () => {
             await new Promise((res) => {
                 WSWebsocketController.onUpgrade.call(
                     wssMock,
-                    {},
+                    {
+                        headers: {},
+                        socket: {}
+                    },
                     socketMock,
                     head,
                     (err, usr) => {
@@ -78,7 +88,9 @@ describe('Websocket ws controller', () => {
                 WSWebsocketController.onUpgrade.call(
                     wssMock,
                     {
-                        url: `${baseUrl}?token=5`
+                        url: `${baseUrl}?token=5`,
+                        headers: {},
+                        socket: {}
                     },
                     socketMock,
                     head,
@@ -99,7 +111,9 @@ describe('Websocket ws controller', () => {
                 WSWebsocketController.onUpgrade.call(
                     wssMock,
                     {
-                        url: `${baseUrl}?token=${token}`
+                        url: `${baseUrl}?token=${token}`,
+                        headers: {},
+                        socket: {}
                     },
                     socketMock,
                     head,
@@ -120,7 +134,9 @@ describe('Websocket ws controller', () => {
                 WSWebsocketController.onUpgrade.call(
                     wssMock,
                     {
-                        url: `${baseUrl}?token=${token}`
+                        url: `${baseUrl}?token=${token}`,
+                        headers: {},
+                        socket: {}
                     },
                     socketMock,
                     head,
@@ -143,7 +159,9 @@ describe('Websocket ws controller', () => {
                 WSWebsocketController.onUpgrade.call(
                     wssMock,
                     {
-                        url: url.toString()
+                        url: url.toString(),
+                        headers: {},
+                        socket: {}
                     },
                     socketMock,
                     head,
@@ -162,7 +180,7 @@ describe('Websocket ws controller', () => {
             const userPayload = 'hello world!';
             const channel = 'TEST';
 
-            WSWebsocketController.registerHandler(channel, (payload: unknown) => {
+            WSWebsocketController.registerHandler(channel, async (payload: unknown) => {
                 listenerFn(payload);
             });
             const controller = new WSWebsocketController(webSocketMock, user);
@@ -178,12 +196,12 @@ describe('Websocket ws controller', () => {
         });
         test('Throw an error when registering duplicate handler', () => {
             const channel = 'TEST';
-            WSWebsocketController.registerHandler(channel, (payload: unknown) => {});
+            WSWebsocketController.registerHandler(channel, async (payload: unknown) => {});
             expect.assertions(1);
             try {
                 WSWebsocketController.registerHandler(
                     channel,
-                    (payload: unknown) => {}
+                    async (payload: unknown) => {}
                 );
             } catch (err) {
                 expect(err).toBeInstanceOf(Error);
@@ -206,6 +224,120 @@ describe('Websocket ws controller', () => {
             controller.onMessage(msg);
             expect(loggerMock.log).toHaveBeenCalledOnce();
             expect(loggerMock.log.mock.calls[0][0]).toBe('error');
+        });
+    });
+    describe('emit', ()=>{
+        test('Call ws when emit', ()=>{
+            const type = 'type';
+            const payload = 10;
+            const controller = new WSWebsocketController(webSocketMock, user);
+            controller.emit(type, payload);
+            expect(webSocketMock.send).toHaveBeenCalledOnce();
+            expect(webSocketMock.send).toHaveBeenCalledWith(
+                JSON.stringify({
+                    type,
+                    payload
+                })
+            );
+        });
+    });
+    describe('connect', ()=>{
+        test('Register listeners on connect', ()=>{
+            const controller = new WSWebsocketController(webSocketMock, user);
+            controller.connect();
+            expect(webSocketMock.on).toHaveBeenCalledTimes(3);
+            const listeners = webSocketMock.on.mock.calls.map((c)=>c[0]).sort();
+            const expectedListeners = ['error', 'message', 'close'].sort();
+            expect(listeners).toEqual(expectedListeners);
+        });
+    });
+    describe('onError', ()=>{
+        test('Log on onError', ()=>{
+            const controller = new WSWebsocketController(webSocketMock, user);
+            loggerMock.log.mockClear();
+            controller.onError();
+            expect(loggerMock.log).toHaveBeenCalledOnce();
+        });
+    });
+    describe('onClose', ()=>{
+        test('Log on onClose', ()=>{
+            const controller = new WSWebsocketController(webSocketMock, user);
+            loggerMock.log.mockClear();
+            controller.onClose();
+            expect(loggerMock.log).toHaveBeenCalledOnce();
+        });
+    });
+    describe('emitRoom', ()=>{
+        test('emitRoom emits to all in the room', async ()=>{
+            const room = 'room';
+            const type = 'type';
+            const payload = 5;
+            const ws1 = createWebSocketMock();
+            const ws2 = createWebSocketMock();
+            const c1 = new WSWebsocketController(ws1, user);
+            const c2 = new WSWebsocketController(ws2, user);
+            c1.join(room);
+            c2.join(room);
+            c1.emitRoom(room, type, payload);
+            expect(ws1.send).toHaveBeenCalledTimes(1);
+            expect(ws2.send).toHaveBeenCalledTimes(1);
+            const content = JSON.stringify({
+                type,
+                payload
+            });
+            expect(ws1.send).toBeCalledWith(
+                content
+            );
+            expect(ws2.send).toBeCalledWith(
+                content
+            );
+        });
+    });
+    describe('broadcastRoom', ()=>{
+        test('broadCatRoom emits to all except the sender in the room', async ()=>{
+            const room = 'room';
+            const type = 'type';
+            const payload = 5;
+            const ws1 = createWebSocketMock();
+            const ws2 = createWebSocketMock();
+            const c1 = new WSWebsocketController(ws1, user);
+            const c2 = new WSWebsocketController(ws2, user);
+            c1.join(room);
+            c2.join(room);
+            c1.broadcastRoom(room, type, payload);
+            expect(ws1.send).toHaveBeenCalledTimes(0);
+            expect(ws2.send).toHaveBeenCalledTimes(1);
+            const content = JSON.stringify({
+                type,
+                payload
+            });
+            expect(ws2.send).toBeCalledWith(
+                content
+            );
+        });
+    });
+    describe('leave', ()=>{
+        test('not receive room emits after leaving', async ()=>{
+            const room = 'room';
+            const type = 'type';
+            const payload = 5;
+            const ws1 = createWebSocketMock();
+            const ws2 = createWebSocketMock();
+            const c1 = new WSWebsocketController(ws1, user);
+            const c2 = new WSWebsocketController(ws2, user);
+            c1.join(room);
+            c2.join(room);
+            c2.leave(room);
+            c1.emitRoom(room, type, payload);
+            expect(ws1.send).toHaveBeenCalledTimes(1);
+            expect(ws2.send).toHaveBeenCalledTimes(0);
+            const content = JSON.stringify({
+                type,
+                payload
+            });
+            expect(ws1.send).toBeCalledWith(
+                content
+            );
         });
     });
 });

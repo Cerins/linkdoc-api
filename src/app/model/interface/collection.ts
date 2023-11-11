@@ -5,6 +5,8 @@ interface ICollection {
     id: string;
     name: string;
     userID: string;
+    visibility: ColVisibility,
+    description: string | null,
     hasAccessLevel(level: ColVisibility, usrID?: string): Promise<boolean>;
     setAccess(usrID: string, visibility: ColVisibility): Promise<void>;
     setVisibility(visibility: ColVisibility): Promise<void>;
