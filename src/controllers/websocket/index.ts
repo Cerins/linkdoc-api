@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { HandlerFn } from './handlers';
 import { v4 } from 'uuid';
 import { PubSubGatewayType } from '../../app/gateway/interface/pubsub';
+import { ICollectionType } from '../../app/model/interface/collection';
 
 interface ISocket {
   on(event: string, callback: (...args: unknown[]) => void): void;
@@ -50,6 +51,7 @@ interface Dependencies {
   logger: ILogger;
   models: {
     User: IUserType;
+    Collection: ICollectionType;
   };
   gateways: {
     PubSub: PubSubGatewayType
@@ -58,7 +60,8 @@ interface Dependencies {
 
 const messageSchema = z.object({
     type: z.string(),
-    payload: z.unknown()
+    payload: z.unknown(),
+    acknowledge: z.string().optional()
 });
 
 interface MessageUnpacked {
@@ -66,6 +69,7 @@ interface MessageUnpacked {
     message: 'emit' | 'broadcast',
     type: string,
     payload: unknown
+    acknowledge?: string
 }
 
 const Message = {
@@ -74,14 +78,16 @@ const Message = {
             origin,
             message,
             type,
-            payload
+            payload,
+            acknowledge
         }: MessageUnpacked
     ) => {
         return JSON.stringify({
             origin,
             message,
             type,
-            payload
+            payload,
+            acknowledge
         });
     },
     unpack: (packed: string) => {
@@ -150,10 +156,11 @@ export default function defineSocketController(dependencies: Dependencies) {
         }
 
         // This method sends the response to the current room
-        public emit(type: string, payload: unknown) {
+        public emit(type: string, payload: unknown, acknowledge?: string) {
             this.ws.send(JSON.stringify({
                 type,
-                payload
+                payload,
+                acknowledge
             }));
         }
 
@@ -161,9 +168,15 @@ export default function defineSocketController(dependencies: Dependencies) {
         // listen to all the events that happen in this room
         public join(room: string) {
             controllerPubSub.subscribe(room, this.sessionID, (message: string)=>{
-                const { origin, message: messageType, type, payload } = Message.unpack(message);
+                const {
+                    origin,
+                    message: messageType,
+                    type,
+                    payload,
+                    acknowledge
+                } = Message.unpack(message);
                 if(!(messageType === 'broadcast' && origin === this.sessionID)) {
-                    this.emit(type, payload);
+                    this.emit(type, payload, acknowledge);
                 }
             });
         }
@@ -174,22 +187,24 @@ export default function defineSocketController(dependencies: Dependencies) {
         }
 
         // This method ensures that the the event can be sent to the room
-        public emitRoom(room: string, type: string, payload: unknown) {
+        public emitRoom(room: string, type: string, payload: unknown, acknowledge?: string) {
             controllerPubSub.publish(room, Message.pack({
                 origin: this.sessionID,
                 message: 'emit',
                 type,
-                payload
+                payload,
+                acknowledge
             }));
         }
 
         // This method ensures that the event can be sent to everyone in the room except the sender
-        public broadcastRoom(room: string, type: string, payload: unknown) {
+        public broadcastRoom(room: string, type: string, payload: unknown, acknowledge?: string) {
             controllerPubSub.publish(room, Message.pack({
                 origin: this.sessionID,
                 message: 'broadcast',
                 type,
-                payload
+                payload,
+                acknowledge
             }));
         }
 
@@ -211,6 +226,8 @@ export default function defineSocketController(dependencies: Dependencies) {
         }
 
         protected errorMiddleware(err: unknown) {
+            // TODO We have to say to the user that they did send the message
+            // with proper schema
             this.logger.log('error', 'Error happened', {
                 err
             });
@@ -223,14 +240,14 @@ export default function defineSocketController(dependencies: Dependencies) {
                 // Then check if it matches the schema
                 const content = JSON.parse(data.toString());
                 const message = messageSchema.parse(content);
-                const { type, payload } = message;
+                const { type, payload, acknowledge } = message;
                 // Check if the handler exists
                 const handler = SocketController.onMessageHandlers.get(type);
                 if(!handler) {
                     throw new Error('No handler');
                 }
                 // Call the handler
-                handler.call(this,payload, type, this.errorMiddleware.bind(this))
+                handler.call(this,payload, type, acknowledge)
                     .catch(this.errorMiddleware.bind(this));
             }catch(err) {
                 this.errorMiddleware(err);

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Knex } from 'knex';
 import { MakeAllOptional, OnlyPrimitiveValues } from '../../../utils/types';
+import GatewayError from '../utils/error';
 
 interface Dependencies {
   db: Knex;
@@ -67,17 +68,29 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
               }
           });
           if (cid === undefined) {
-              const id = await db(tableName).insert(fullRecord);
-              (this as any).id = id[0].toString();
-              // Iterate over the fields that were not set and simply state them as null
-              // TODO this causes issues with values that get defaulted by the db
-              // but currently ignore this
-              Object.entries(physicalNames).forEach(([logical]) => {
-                  const item = this._data.get(logical as any);
-                  if(item === undefined) {
-                      (this as any)[logical] = null;
+              try{
+                  const id = await db(tableName).insert(fullRecord);
+                  (this as any).id = id[0].toString();
+                  // Iterate over the fields that were not set and simply state them as null
+                  // TODO this causes issues with values that get defaulted by the db
+                  // but currently ignore this
+                  Object.entries(physicalNames).forEach(([logical]) => {
+                      const item = this._data.get(logical as any);
+                      if(item === undefined) {
+                          (this as any)[logical] = null;
+                      }
+                  });
+              } catch(err: unknown) {
+                  if(
+                      typeof err === 'object'
+                        && err !== null
+                        && 'code' in err
+                        && err.code === 'SQLITE_CONSTRAINT'
+                  ) {
+                      throw new GatewayError('CONSTRAINT_VIOLATION', 'sqlite constraint violation');
                   }
-              });
+                  throw err;
+              }
           } else {
               const physicalID = (physicalNames as any)['id'];
               await db(tableName)

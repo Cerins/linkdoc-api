@@ -4,7 +4,7 @@ type HandlerFn = (
     this: ISocketController,
     payload: unknown,
     type: string,
-    next: (err: unknown) => void
+    acknowledge?: string,
 ) => Promise<void>;
 
 

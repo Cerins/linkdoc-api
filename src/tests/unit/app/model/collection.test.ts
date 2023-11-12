@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import Models from '../../../../app/model';
 import SQLiteGateways from '../../../../app/gateway/sqlite';
 import { ColVisibility } from '../../../../app/gateway/interface/collection';
+import GatewayError from '../../../../app/gateway/utils/error';
 
 const usrName = 'name';
 const usrPassword = 'password';
@@ -246,11 +247,12 @@ describe('Collection', () => {
             const user = await models.User.register(usrName, usrPassword);
             const collection = await user.createCollection(colName);
             await collection.createDocument(docName);
-            expect.assertions(1);
+            expect.assertions(2);
             try{
                 await collection.createDocument(docName);
             }catch(err){
-                expect(err).toBeInstanceOf(Error);
+                expect(err).toBeInstanceOf(GatewayError);
+                expect((err as GatewayError).code).toBe('CONSTRAINT_VIOLATION');
             }
         });
     });
