@@ -119,7 +119,7 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
       // they should be logical and would be under queryParams
       // like so { where: {....}, attributes: new Set()}
       // thanks
-      public static async findAll(queryParams?: { where: AllOptionalB }) {
+      public static async findAll(this: any, queryParams?: { where: AllOptionalB }) {
           let query = db(tableName);
           Object.entries(queryParams?.where ?? {}).forEach(([key, val]) => {
               if(val === undefined) { return; }
@@ -132,7 +132,7 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
           );
           const itemsRefs = await query;
           return itemsRefs.map((ref) => {
-              const item = new Base();
+              const item = new this();
               item.link({
                   ...ref,
                   id: ref.id.toString()
