@@ -3,6 +3,7 @@ import errorHandler from '../../utils/error/handler';
 import outputType from '../../utils/outputType';
 import { HandlerFn } from '..';
 import RequestError from '../../utils/error/request';
+import collectionChecked from '../../utils/findCollection';
 
 const payloadSchema = z.object({
     uuid: z.string()
@@ -13,19 +14,7 @@ const collectionDelete: HandlerFn = errorHandler(async function (
     acknowledge
 ) {
     const { uuid } = await payloadSchema.parseAsync(payload);
-    const collection = await this.models.Collection.findOne({
-        uuid
-    });
-    if(collection === undefined) {
-        throw new RequestError({
-            type: 'NOT_FOUND',
-            payload: {},
-            log: {
-                uuid,
-                reason: 'collection not found'
-            }
-        });
-    }
+    const collection = await collectionChecked(this, uuid, null);
     if(collection.userID !== this.user.id) {
         throw new RequestError({
             type: 'FORBIDDEN',
