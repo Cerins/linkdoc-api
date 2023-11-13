@@ -11,7 +11,9 @@ const phyisicalProperty = 'tstTest';
 
 describe('Base gateway', ()=>{
     let Gateway: ReturnType<typeof defineBaseGateway>;
-    const whereMock = vi.fn();
+    const whereMock = vi.fn(()=>({
+        del: ()=>{}
+    }));
 
     const dbMock = vi.fn(()=>({
         where: whereMock

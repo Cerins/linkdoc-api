@@ -38,6 +38,10 @@ export default function defineCollection(dependencies: Dependencies) {
             return this.collection.id;
         }
 
+        public get uuid(){
+            return this.collection.uuid;
+        }
+
         public get name() {
             return this.collection.name;
         }
@@ -89,12 +93,18 @@ export default function defineCollection(dependencies: Dependencies) {
             await usrCol.save();
         }
 
+        public async delete(){
+            await this.collection.delete();
+        }
+
         public static async findOne(properties: {
             id?: string
+            uuid?: string
         }) {
             const item = await this.dependencies.gateways.Collection.findOne({
                 where: {
-                    id: properties.id
+                    id: properties.id,
+                    uuid: properties.uuid
                 }
             });
             if(item === undefined) {return undefined;}

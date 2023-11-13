@@ -20,6 +20,7 @@ const sqliteTableSetup = [
     `
         CREATE TABLE IF NOT EXISTS Collection (
             colID INTEGER PRIMARY KEY,
+            colUUID TEXT NOT NULL UNIQUE,
             colName TEXT NOT NULL,
             colDescription TEXT,
             col_usrID INTEGER NOT NULL,

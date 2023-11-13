@@ -10,6 +10,7 @@ const enum ColVisibility {
 }
 
 interface ICollectionGateway extends IObjectGateway {
+        readonly uuid: string;
         name: string;
         description: string | null;
         createdAt: Date;

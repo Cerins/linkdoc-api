@@ -38,7 +38,7 @@ const create: HandlerFn = errorHandler(async function (
     this.emit(
         outputType(type, 'OK'),
         {
-            id: collection.id,
+            uuid: collection.uuid,
             name: collection.name,
             owner: this.user.name,
             visibility: collection.visibility,

@@ -43,6 +43,8 @@ describe('collection create', () => {
             },
             acknowledge: ack
         });
+        expect(content.payload.uuid).toBeDefined();
+        // expect(content.payload.id).toBeDefined();
         const collection = await c1.models.Collection.findOne({
             id: content.id
         });

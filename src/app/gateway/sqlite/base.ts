@@ -104,7 +104,7 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
       public async delete() {
           await db(tableName).where({
               [(physicalNames as any)['id']]: (this as any).id
-          });
+          }).del();
       }
 
       // TODO currently all fields are returned

@@ -2,6 +2,7 @@
 import { Knex } from 'knex';
 import defineBaseGateway from './base';
 import { ColVisibility, ICollectionGateway } from '../interface/collection';
+import { v4 } from 'uuid';
 
 interface Dependencies {
   db: Knex;
@@ -16,6 +17,7 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
             tableName: 'Collection',
             physicalNames: {
                 id: 'colID',
+                uuid: 'colUUID',
                 name: 'colName',
                 description: 'colDescription',
                 createdAt: 'colCreatedAt',
@@ -25,6 +27,10 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
         }
     );
     class Collection extends Base implements ICollectionGateway {
+        public override async save() {
+            (this as any).uuid = v4();
+            await super.save();
+        }
         public async hasAccessLevel(level: ColVisibility, usrID?: string) {
             // TODO
             // This method should not always consult with the database but instead

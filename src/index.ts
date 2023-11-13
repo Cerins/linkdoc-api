@@ -3,7 +3,7 @@ import defineHTTPUserController from './controllers/http/user';
 import createLogger from './utils/logger';
 import config from './config';
 import WSWebsocket from './routes/websocket/ws';
-import defineSocketController, { ISocketController } from './controllers/websocket';
+import defineSocketController from './controllers/websocket';
 import SQLiteGateways from './app/gateway/sqlite';
 import Models from './app/model';
 import collectionsCreate from './controllers/websocket/handlers/collections/create';
@@ -36,7 +36,7 @@ async function main() {
         models,
         gateways
     });
-    SocketController.registerHandler('COLLECTIONS.CREATE', collectionsCreate);
+    SocketController.registerHandler('COL.CREATE', collectionsCreate);
 
     const wsRouter = new WSWebsocket({
         logger,

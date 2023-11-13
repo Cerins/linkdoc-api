@@ -3,6 +3,7 @@ import { IDocument } from './document';
 
 interface ICollection {
     id: string;
+    readonly uuid: string;
     name: string;
     userID: string;
     visibility: ColVisibility,
@@ -12,10 +13,12 @@ interface ICollection {
     setVisibility(visibility: ColVisibility): Promise<void>;
     findDocument(name: string): Promise<IDocument | undefined>;
     createDocument(name: string): Promise<IDocument>
+    delete(): Promise<void>
 }
 interface ICollectionType {
     findOne(properties: {
         id?: string;
+        uuid?: string;
     }): Promise<ICollection | undefined>
     new (collection: ICollectionGateway): ICollection
 }
