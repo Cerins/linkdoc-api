@@ -13,7 +13,7 @@ const usrInfo = [
     }
 ];
 
-const endpoint = 'COLLECTIONS.CREATE';
+const endpoint = 'COL.CREATE';
 
 const colInfo = [
     {
