@@ -44,7 +44,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 users: [
                     {
                         name: env.users[1].name,
@@ -76,7 +76,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 users: [
                     {
                         name: env.users[1].name,
@@ -108,7 +108,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 users: [
                     {
                         name: env.users[1].name,
@@ -122,7 +122,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 users: [
                     {
                         name: env.users[1].name,
@@ -154,7 +154,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 visibility: ColVisibility.READ
             },
             endpoint,
@@ -181,7 +181,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 visibility: ColVisibility.WRITE
             },
             endpoint,
@@ -208,7 +208,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 visibility: ColVisibility.WRITE
             },
             endpoint,
@@ -217,7 +217,7 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id,
+                colUUID: collection.uuid,
                 visibility: ColVisibility.PRIVATE
             },
             endpoint,
@@ -244,7 +244,14 @@ describe('collection create', () => {
         await collectionShare.call(
             c1,
             {
-                colUUID: collection.id
+                colUUID: collection.uuid,
+                users: [
+                    {
+
+                        name: '',
+                        role: ColVisibility.WRITE
+                    }
+                ]
             },
             endpoint,
             ack

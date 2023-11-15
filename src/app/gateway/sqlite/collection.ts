@@ -28,7 +28,13 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
     );
     class Collection extends Base implements ICollectionGateway {
         public override async save() {
-            (this as any).uuid = v4();
+            const target = this as unknown as {
+                _data: Map<string, unknown>
+            };
+            const uuid = target._data.get('uuid');
+            if(uuid === undefined) {
+                target._data.set('uuid', v4());
+            }
             await super.save();
         }
         public async hasAccessLevel(level: ColVisibility, usrID?: string) {

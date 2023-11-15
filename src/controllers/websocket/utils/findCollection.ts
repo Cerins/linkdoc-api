@@ -5,7 +5,8 @@ import RequestError from './error/request';
 export default async function collectionChecked(
     session: ISocketController,
     uuid: string,
-    accessLevel: ColVisibility | null
+    accessLevel: ColVisibility | null,
+    creator?: boolean
 ) {
     const col = await session.models.Collection.findOne({
         uuid
@@ -23,24 +24,28 @@ export default async function collectionChecked(
             }
         });
     }
+    const forbiddenError = new RequestError({
+        type: 'FORBIDDEN',
+        payload: {
+            errors: [
+                {
+                    code: 'FORBIDDEN',
+                    message: 'no access'
+                }
+            ]
+        },
+        log: {
+            reason: 'no access to collection'
+        }
+    });
     if(accessLevel !== null) {
         const hasAccess = await col.hasAccessLevel(ColVisibility.READ, session.user.id);
         if(!hasAccess) {
-            throw new RequestError({
-                type: 'FORBIDDEN',
-                payload: {
-                    errors: [
-                        {
-                            code: 'FORBIDDEN',
-                            message: 'no access'
-                        }
-                    ]
-                },
-                log: {
-                    reason: 'no access to collection'
-                }
-            });
+            throw forbiddenError;
         }
+    }
+    if(creator && session.user.id !== col.userID) {
+        throw forbiddenError;
     }
     return col;
 }
