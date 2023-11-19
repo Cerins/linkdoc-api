@@ -1,8 +1,8 @@
 
 import { beforeEach, describe, expect, test } from 'vitest';
-import Models from '../../../../app/model';
-import SQLiteGateways from '../../../../app/gateway/sqlite';
-import { IDocument, TransformType } from '../../../../app/model/interface/document';
+import Models from '../../../../app/models';
+import SQLiteGateways from '../../../../app/gateways/sqlite';
+import { IDocument, TransformType } from '../../../../app/models/interface/document';
 
 const usrName = 'name';
 const usrPassword = 'password';

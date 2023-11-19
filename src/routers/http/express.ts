@@ -1,5 +1,5 @@
 import express from 'express';
-import type { IHTTPUserController } from '../../controllers/http/user';
+import type { HTTPUserControllerType } from '../../controllers/http/user';
 
 import { ZodError } from 'zod';
 import ILogger from '../../utils/interface/logger';
@@ -12,7 +12,7 @@ import ResponseHelper, {
 
 interface Dependencies {
   controllers: {
-    HTTPUserController: IHTTPUserController;
+    HTTPUserController: HTTPUserControllerType;
   };
   logger: ILogger;
   config: {

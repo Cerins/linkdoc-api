@@ -1,8 +1,8 @@
 import config from '../../config';
-import type { CollectionGatewayType } from '../gateway/interface/collection';
-import type { DocumentGatewayType } from '../gateway/interface/document';
-import type { UserGatewayType } from '../gateway/interface/user';
-import type { UserCollectionGatewayType } from '../gateway/interface/userCollection';
+import type { CollectionGatewayType } from '../gateways/interface/collection';
+import type { DocumentGatewayType } from '../gateways/interface/document';
+import type { UserGatewayType } from '../gateways/interface/user';
+import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 import defineCollection from './collection';
 import defineDocument from './document';
 import type { ICollectionType } from './interface/collection';

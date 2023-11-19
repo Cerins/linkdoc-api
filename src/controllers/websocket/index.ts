@@ -1,11 +1,11 @@
 import type ILogger from '../../utils/interface/logger';
-import { IUser, IUserType } from '../../app/model/interface/user';
+import { IUser, IUserType } from '../../app/models/interface/user';
 import JWT from '../../utils/jwt';
 import { z } from 'zod';
 import type { HandlerFn } from './handlers';
 import { v4 } from 'uuid';
-import { PubSubGatewayType } from '../../app/gateway/interface/pubsub';
-import { ICollectionType } from '../../app/model/interface/collection';
+import { PubSubGatewayType } from '../../app/gateways/interface/pubsub';
+import { ICollectionType } from '../../app/models/interface/collection';
 
 interface ISocket {
   on(event: string, callback: (...args: unknown[]) => void): void;
@@ -123,6 +123,8 @@ export default function defineSocketController(dependencies: Dependencies) {
                 throw new Error('Handler already registered');
             }
             SocketController.onMessageHandlers.set(name, handler);
+            // DO this so creating controllers seems syntacticly more pleasant
+            return this;
         }
 
         protected ws: IWebSocket;

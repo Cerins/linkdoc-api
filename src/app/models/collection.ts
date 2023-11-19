@@ -2,9 +2,9 @@ import type {
     ColVisibility,
     CollectionGatewayType,
     ICollectionGateway
-} from '../gateway/interface/collection';
-import { DocumentGatewayType } from '../gateway/interface/document';
-import type { UserCollectionGatewayType } from '../gateway/interface/userCollection';
+} from '../gateways/interface/collection';
+import { DocumentGatewayType } from '../gateways/interface/document';
+import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 import type { ICollection } from './interface/collection';
 import type { IDocumentType } from './interface/document';
 

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import Models from '../../../../app/model';
-import SQLiteGateways from '../../../../app/gateway/sqlite';
-import { ColVisibility } from '../../../../app/gateway/interface/collection';
-import GatewayError from '../../../../app/gateway/utils/error';
+import Models from '../../../../app/models';
+import SQLiteGateways from '../../../../app/gateways/sqlite';
+import { ColVisibility } from '../../../../app/gateways/interface/collection';
+import GatewayError from '../../../../app/gateways/utils/error';
 
 const usrName = 'name';
 const usrPassword = 'password';

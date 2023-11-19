@@ -2,13 +2,13 @@ import bcrypt from 'bcrypt';
 import {
     IUserGateway,
     UserGatewayType
-} from '../../app/gateway/interface/user';
+} from '../gateways/interface/user';
 import { ICollectionType } from './interface/collection';
 import {
     ColVisibility,
     CollectionGatewayType
-} from '../gateway/interface/collection';
-import { UserCollectionGatewayType } from '../gateway/interface/userCollection';
+} from '../gateways/interface/collection';
+import { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 
 interface Dependencies {
   gateways: {

@@ -16,7 +16,7 @@ export = {
             }
         },
         controllers: {},
-        routes: {
+        routers: {
             http: {
                 port: 3000
             },

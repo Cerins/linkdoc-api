@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { HandlerFn } from '..';
 import errorHandler from '../../utils/error/handler';
 import outputType from '../../utils/outputType';
-import { ColVisibility } from '../../../../app/gateway/interface/collection';
+import { ColVisibility } from '../../../../app/gateways/interface/collection';
 import collectionChecked from '../../utils/findCollection';
-import { TransformType } from '../../../../app/model/interface/document';
+import { TransformType } from '../../../../app/models/interface/document';
 import docRoom from '../../utils/documentRoom';
 
 const payloadSchema = z.object({

@@ -1,4 +1,4 @@
-import GatewayError from '../../../../../../app/gateway/utils/error';
+import GatewayError from '../../../../../../app/gateways/utils/error';
 import RequestError from '../../request';
 import { ErrorHandlerPlugin } from '../generic';
 

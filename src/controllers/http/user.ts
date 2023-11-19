@@ -2,7 +2,7 @@ import { z } from 'zod';
 import ResponseHelper, { IReq, IRes } from './utils/resHandler';
 import async from './utils/handlePromise';
 import JWT from '../../utils/jwt';
-import { IUserType } from '../../app/model/interface/user';
+import { IUserType } from '../../app/models/interface/user';
 
 interface Dependencies {
   models: {
@@ -61,7 +61,7 @@ function defineHTTPUserController(dependencies: Dependencies) {
     return HTTPUserController;
 }
 
-type IHTTPUserController = ReturnType<typeof defineHTTPUserController>;
+type HTTPUserControllerType = ReturnType<typeof defineHTTPUserController>;
 
 export default defineHTTPUserController;
-export type { IHTTPUserController };
+export type { HTTPUserControllerType };

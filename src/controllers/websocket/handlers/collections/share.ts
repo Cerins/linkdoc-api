@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { HandlerFn } from '..';
 import errorHandler from '../../utils/error/handler';
 import outputType from '../../utils/outputType';
-import { ColVisibility } from '../../../../app/gateway/interface/collection';
+import { ColVisibility } from '../../../../app/gateways/interface/collection';
 import collectionChecked from '../../utils/findCollection';
 import RequestError from '../../utils/error/request';
 

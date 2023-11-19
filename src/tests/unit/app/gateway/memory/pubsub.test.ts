@@ -1,5 +1,5 @@
 import { describe, test, vi, expect, beforeEach } from 'vitest';
-import PubSub from '../../../../../app/gateway/memory/pubsub';
+import PubSub from '../../../../../app/gateways/memory/pubsub';
 
 const room1 = 'room1';
 const room2 = 'room2';

@@ -4,9 +4,9 @@ import createControllerEnvironment, {
     createWebSocketMock
 } from '../../../../../utils/environment/controller';
 import outputType from '../../../../../../controllers/websocket/utils/outputType';
-import { ICollection } from '../../../../../../app/model/interface/collection';
+import { ICollection } from '../../../../../../app/models/interface/collection';
 import collectionShare from '../../../../../../controllers/websocket/handlers/collections/share';
-import { ColVisibility } from '../../../../../../app/gateway/interface/collection';
+import { ColVisibility } from '../../../../../../app/gateways/interface/collection';
 
 const usrInfo = [
     {

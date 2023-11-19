@@ -4,11 +4,11 @@ import createControllerEnvironment, {
     createWebSocketMock
 } from '../../../../../utils/environment/controller';
 import outputType from '../../../../../../controllers/websocket/utils/outputType';
-import { ICollection } from '../../../../../../app/model/interface/collection';
+import { ICollection } from '../../../../../../app/models/interface/collection';
 import {
     IDocument,
     TransformType
-} from '../../../../../../app/model/interface/document';
+} from '../../../../../../app/models/interface/document';
 import documentRead from '../../../../../../controllers/websocket/handlers/documents/read';
 
 const usrInfo = [

@@ -2,7 +2,7 @@
 import {
     IDocumentGateway,
     DocumentGatewayType
-} from '../gateway/interface/document';
+} from '../gateways/interface/document';
 import {
     EraseTransform,
     IDocument,

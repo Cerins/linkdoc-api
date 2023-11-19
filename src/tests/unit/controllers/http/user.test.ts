@@ -1,13 +1,13 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import defineHTTPUserController, {
-    IHTTPUserController
+    HTTPUserControllerType
 } from '../../../../controllers/http/user';
 import { ReqError } from '../../../../controllers/http/utils/resHandler';
 import JWT from '../../../../utils/jwt';
 import { ZodError } from 'zod';
-import SQLiteGateways from '../../../../app/gateway/sqlite';
-import { IUser } from '../../../../app/model/interface/user';
-import Models from '../../../../app/model';
+import SQLiteGateways from '../../../../app/gateways/sqlite';
+import { IUser } from '../../../../app/models/interface/user';
+import Models from '../../../../app/models';
 
 describe('HTTP User controller', () => {
     describe('Login', () => {
@@ -42,7 +42,7 @@ describe('HTTP User controller', () => {
                 }
             }
         };
-        let HTTPUserController!: IHTTPUserController;
+        let HTTPUserController!: HTTPUserControllerType;
         let user!: IUser;
         beforeEach(async () => {
             // Delete all users

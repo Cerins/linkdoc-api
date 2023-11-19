@@ -1,5 +1,5 @@
 import { ISocketController } from '..';
-import { ColVisibility } from '../../../app/gateway/interface/collection';
+import { ColVisibility } from '../../../app/gateways/interface/collection';
 import RequestError from './error/request';
 
 export default async function collectionChecked(

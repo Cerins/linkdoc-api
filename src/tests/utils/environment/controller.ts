@@ -1,8 +1,8 @@
 //
 import { vi } from 'vitest';
 import defineSocketController from '../../../controllers/websocket';
-import SQLiteGateways from '../../../app/gateway/sqlite';
-import Models from '../../../app/model';
+import SQLiteGateways from '../../../app/gateways/sqlite';
+import Models from '../../../app/models';
 import { HandlerFn } from '../../../controllers/websocket/handlers';
 export function createWebSocketMock() {
     return {

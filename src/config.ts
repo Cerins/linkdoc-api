@@ -18,7 +18,7 @@ const schema = z.object({
         })
     }),
     controllers: z.object({}),
-    routes: z.object({
+    routers: z.object({
         http: z.object({
             port: z.number().gt(0)
         }),
@@ -36,4 +36,7 @@ const schema = z.object({
 
 const config = schema.parse(rawConfig);
 
+type Config = typeof config
+
 export default config;
+export type { Config };

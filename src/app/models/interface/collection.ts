@@ -1,4 +1,4 @@
-import { ColVisibility, ICollectionGateway } from '../../gateway/interface/collection';
+import { ColVisibility, ICollectionGateway } from '../../gateways/interface/collection';
 import { IDocument } from './document';
 
 interface ICollection {

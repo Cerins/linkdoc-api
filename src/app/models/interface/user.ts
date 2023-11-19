@@ -5,6 +5,7 @@ interface IUser {
     name: string;
     validatePassword(password: string): Promise<boolean>;
     createCollection(name: string): Promise<ICollection>;
+    delete(): Promise<void>
 }
 
 interface IUserType {

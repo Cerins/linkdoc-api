@@ -1,12 +1,13 @@
-import ExpressAPI from './routes/http/express';
 import defineHTTPUserController from './controllers/http/user';
 import createLogger from './utils/logger';
-import config from './config';
-import WSWebsocket from './routes/websocket/ws';
 import defineSocketController from './controllers/websocket';
-import SQLiteGateways from './app/gateway/sqlite';
-import Models from './app/model';
+import SQLiteGateways from './app/gateways/sqlite';
+import Models from './app/models';
 import collectionsCreate from './controllers/websocket/handlers/collections/create';
+import { program } from 'commander';
+import ConsoleController from './controllers/console';
+import STDWriter from './utils/writer/std';
+import config from './config';
 
 
 async function main() {
@@ -18,40 +19,65 @@ async function main() {
     const controllers = {
         HTTPUserController: defineHTTPUserController({
             models
+        }),
+        SocketController: defineSocketController({
+            config: {
+                // TODO - Setup config
+                baseUrl: 'http://localhost:3000'
+            },
+            logger,
+            models,
+            gateways
         })
+            .registerHandler('COL.CREATE', collectionsCreate)
     };
-    const httpRouter = new ExpressAPI({
+    const consoleController = new ConsoleController({
+        logger,
         controllers,
-        logger,
-        config: {
-            port: config.routes.http.port
-        }
-    });
-    // TODO - Setup config
-    const SocketController = defineSocketController({
-        config: {
-            baseUrl: 'http://localhost:3000'
-        },
-        logger,
         models,
-        gateways
-    });
-    SocketController.registerHandler('COL.CREATE', collectionsCreate);
+        config
+    }, new STDWriter());
+    program.name('linkdoc-manger')
+        .description('LinkDoc Management CLI')
+        .version('0.0.1');
 
-    const wsRouter = new WSWebsocket({
-        logger,
-        config: {
-            port: config.routes.websocket.port
-        },
-        controllers: {
-            SocketController
-        }
-    });
-    await httpRouter.start();
-    await wsRouter.start();
+    program
+        .command('user-register')
+        .description('Register a new user')
+        .option('-u, --username <username>', 'Username')
+        .option('-p, --password <password>', 'Password')
+        .action(async(options)=>{
+            await consoleController.userRegister(options.username, options.password);
+            // TODO This is done because of knex running in the background
+            process.exit(0);
+        });
+    program
+        .command('user-delete')
+        .description('Remove a user')
+        .option('-u, --username <username>', 'Username')
+        .action(async (options) => {
+            await consoleController.userDelete(options.username);
+            // TODO This is done because of knex running in the background
+            process.exit(0);
+        });
+    program
+        .command('websocket-start')
+        .description('Start the WebSocket server')
+        .action(async () => {
+            await consoleController.wsStart();
+        });
+
+    program
+        .command('http-start')
+        .description('Start the HTTP server')
+        .action(async () => {
+            await consoleController.httpStart();
+        });
+    await program.parseAsync(process.argv);
 }
 
 main().catch((err) => {
     // eslint-disable-next-line no-console
     console.error(err);
+    process.exit(0);
 });

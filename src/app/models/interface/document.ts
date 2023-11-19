@@ -1,4 +1,4 @@
-import { IDocumentGateway } from '../../gateway/interface/document';
+import { IDocumentGateway } from '../../gateways/interface/document';
 
 const enum TransformType {
     WRITE = 'WRITE',
