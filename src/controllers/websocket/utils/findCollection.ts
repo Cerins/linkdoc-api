@@ -39,7 +39,7 @@ export default async function collectionChecked(
         }
     });
     if(accessLevel !== null) {
-        const hasAccess = await col.hasAccessLevel(ColVisibility.READ, session.user.id);
+        const hasAccess = await col.hasAccessLevel(accessLevel, session.user.id);
         if(!hasAccess) {
             throw forbiddenError;
         }

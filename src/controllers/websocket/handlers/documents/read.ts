@@ -2,9 +2,9 @@ import { z } from 'zod';
 import { HandlerFn } from '..';
 import errorHandler from '../../utils/error/handler';
 import outputType from '../../utils/outputType';
-import RequestError from '../../utils/error/request';
 import { ColVisibility } from '../../../../app/gateway/interface/collection';
 import collectionChecked from '../../utils/findCollection';
+import docRoom from '../../utils/documentRoom';
 
 const payloadSchema = z.object({
     docName: z.string(),
@@ -27,6 +27,7 @@ const documentRead: HandlerFn = errorHandler(async function (
         documentForRes.name = doc.name;
         documentForRes.text = doc.text;
     }
+    this.join(docRoom(colUUID, docName));
     this.emit(
         outputType(type, 'OK'),
         documentForRes,

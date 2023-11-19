@@ -37,7 +37,7 @@ const docInfo = [
     }
 ];
 
-describe('collection create', () => {
+describe('Document read', () => {
     let env: ControllerEnvironment;
     let col: ICollection;
     let doc: IDocument;
@@ -53,7 +53,7 @@ describe('collection create', () => {
             payload: {
                 sid: 0,
                 index: 0,
-                text: doc.text
+                text: docInfo[0].text
             }
         });
     });
@@ -129,7 +129,7 @@ describe('collection create', () => {
             type: outputType(endpoint, 'OK'),
             payload: {
                 name: wrongName,
-                text: doc.text
+                text: ''
             },
             acknowledge: ack
         });

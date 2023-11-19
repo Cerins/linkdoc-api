@@ -133,6 +133,12 @@ export default function defineSocketController(dependencies: Dependencies) {
 
         protected readonly sessionInfo?: SessionInfo;
 
+        // Each session can be only connected to one room
+        // Or in other words each session can view the updates for only one document
+        // That is the assupmtion.
+        // If that changes, change this implmentation to support multiple rooms
+        private currentRoom: string | null = null;
+
         public get models() {
             return dependencies.models;
         }
@@ -167,6 +173,7 @@ export default function defineSocketController(dependencies: Dependencies) {
         // This method will make sure that the session
         // listen to all the events that happen in this room
         public join(room: string) {
+            if(this.currentRoom !== null) { this.leave(this.currentRoom); }
             controllerPubSub.subscribe(room, this.sessionID, (message: string)=>{
                 const {
                     origin,
@@ -179,11 +186,13 @@ export default function defineSocketController(dependencies: Dependencies) {
                     this.emit(type, payload, acknowledge);
                 }
             });
+            this.currentRoom = room;
         }
 
         // This method ensures that the session leaves the room
         public leave(room: string) {
             controllerPubSub.unsubscribe(room, this.sessionID);
+            this.currentRoom = null;
         }
 
         // This method ensures that the the event can be sent to the room
