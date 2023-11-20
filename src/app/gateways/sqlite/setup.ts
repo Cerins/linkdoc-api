@@ -75,6 +75,24 @@ const sqliteTableSetup = [
     `,
     `
         CREATE INDEX IF NOT EXISTS idx_docName on Document(docName);
+    `,
+    `
+        CREATE TABLE IF NOT EXISTS CollectionOpened (
+            cloID INTEGER PRIMARY KEY,
+            clo_usrID INTEGER NOT NULL,
+            clo_docID INTEGER NOT NULL,
+            cloCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            cloOpened TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            FOREIGN KEY (clo_usrID)
+            REFERENCES User(usrID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            FOREIGN KEY (clo_docID)
+            REFERENCES Collection(colID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            UNIQUE(clo_usrID, clo_docID)
+        )
     `
 ];
 

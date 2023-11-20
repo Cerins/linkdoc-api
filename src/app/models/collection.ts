@@ -3,6 +3,7 @@ import type {
     CollectionGatewayType,
     ICollectionGateway
 } from '../gateways/interface/collection';
+import { CollectionOpenedGatewayType } from '../gateways/interface/collectionOpened';
 import { DocumentGatewayType } from '../gateways/interface/document';
 import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 import type { ICollection } from './interface/collection';
@@ -13,6 +14,7 @@ interface Dependencies {
         Collection: CollectionGatewayType
         UserCollection: UserCollectionGatewayType
         Document: DocumentGatewayType
+        CollectionOpened: CollectionOpenedGatewayType
     },
     models: {
         Document: IDocumentType
@@ -95,6 +97,24 @@ export default function defineCollection(dependencies: Dependencies) {
 
         public async delete(){
             await this.collection.delete();
+        }
+
+        public async readBy(usrID: string) {
+            const { CollectionOpened } = this.dependencies.gateways;
+            let co = await CollectionOpened.findOne({
+                where: {
+                    collectionID: this.id,
+                    userID: usrID
+                }
+            });
+            // TODO also unpleasant that there are 2 queries
+            if(co === undefined) {
+                co = new CollectionOpened();
+                co.userID = usrID;
+                co.collectionID = this.id;
+            }
+            co.opened = new Date();
+            await co.save();
         }
 
         public static async findOne(properties: {

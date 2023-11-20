@@ -11,7 +11,7 @@ export default async function collectionChecked(
     const col = await session.models.Collection.findOne({
         uuid
     });
-    if(col === undefined) {
+    if (col === undefined) {
         throw new RequestError({
             type: 'NOT_FOUND',
             payload: {
@@ -38,14 +38,20 @@ export default async function collectionChecked(
             reason: 'no access to collection'
         }
     });
-    if(accessLevel !== null) {
+    if (accessLevel !== null) {
         const hasAccess = await col.hasAccessLevel(accessLevel, session.user.id);
-        if(!hasAccess) {
+        if (!hasAccess) {
             throw forbiddenError;
         }
     }
-    if(creator && session.user.id !== col.userID) {
+    if (creator && session.user.id !== col.userID) {
         throw forbiddenError;
     }
+    // Do not block the response handler because of metadata setting
+    col.readBy(session.user.id).catch((err) => {
+        session.logger.log('error', 'readBy error', {
+            error: err
+        });
+    });
     return col;
 }

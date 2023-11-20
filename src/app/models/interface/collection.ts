@@ -14,6 +14,7 @@ interface ICollection {
     findDocument(name: string): Promise<IDocument | undefined>;
     createDocument(name: string): Promise<IDocument>
     delete(): Promise<void>
+    readBy(usrID: string): Promise<void>
 }
 interface ICollectionType {
     findOne(properties: {

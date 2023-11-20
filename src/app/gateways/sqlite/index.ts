@@ -13,6 +13,8 @@ import { DocumentGatewayType } from '../interface/document';
 import defineDocumentGateway from './document';
 import { PubSubGatewayType } from '../interface/pubsub';
 import PubSub from '../memory/pubsub';
+import { CollectionOpenedGatewayType } from '../interface/collectionOpened';
+import defineCollectionOpenedGateway from './collectionOpened';
 
 // Create a collection of gateways that use SQLite
 // Because this is a preset i do not see the damage of
@@ -21,6 +23,7 @@ export default class SQLiteGateways {
     User: UserGatewayType;
     Collection: CollectionGatewayType;
     UserCollection: UserCollectionGatewayType;
+    CollectionOpened: CollectionOpenedGatewayType;
     Document: DocumentGatewayType;
     PubSub: PubSubGatewayType;
     constructor(db: Knex) {
@@ -34,6 +37,9 @@ export default class SQLiteGateways {
             db
         });
         this.Document = defineDocumentGateway({
+            db
+        });
+        this.CollectionOpened = defineCollectionOpenedGateway({
             db
         });
         this.PubSub = PubSub;
