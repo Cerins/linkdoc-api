@@ -3,6 +3,7 @@ import Models from '../../../../app/models';
 import SQLiteGateways from '../../../../app/gateways/sqlite';
 import { ColVisibility } from '../../../../app/gateways/interface/collection';
 import GatewayError from '../../../../app/gateways/utils/error';
+import sleep from '../../../../utils/sleep';
 
 const usrName = 'name';
 const usrPassword = 'password';
@@ -255,5 +256,58 @@ describe('Collection', () => {
                 expect((err as GatewayError).code).toBe('CONSTRAINT_VIOLATION');
             }
         });
+    });
+    describe('readBy', ()=>{
+        test('Return max time as readBy time', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            await sleep(2);
+            const ct = new Date();
+            await sleep(2);
+            await collection.readBy(user.id);
+            const cl = await user.getCollectionList();
+            expect(cl.length).toBe(1);
+            const item = cl[0];
+            expect(item.colUUID).toBe(collection.uuid);
+            expect(item.time.getTime()).toBeGreaterThan(ct.getTime());
+        });
+        test('Return nothing if limit is 0', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            await sleep(2);
+            const ct = new Date();
+            await sleep(2);
+            await collection.readBy(user.id);
+            const cl = await user.getCollectionList({
+                limit: 0
+            });
+            expect(cl.length).toBe(0);
+        });
+        test('Return nothing if before does not include item', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            await sleep(2);
+            const ct = new Date();
+            await sleep(2);
+            await collection.readBy(user.id);
+            const cl = await user.getCollectionList({
+                before: ct
+            });
+            expect(cl.length).toBe(0);
+        });
+        test('Return max time as creation time', async ()=>{
+            const user = await models.User.register(usrName, usrPassword);
+            const collection = await user.createCollection(colName);
+            await sleep(2);
+            const ct = new Date();
+            await sleep(2);
+            // await collection.readBy(user.id);
+            const cl = await user.getCollectionList();
+            expect(cl.length).toBe(1);
+            const item = cl[0];
+            expect(item.colUUID).toBe(collection.uuid);
+            expect(item.time.getTime()).toBeLessThan(ct.getTime());
+        });
+
     });
 });

@@ -80,18 +80,18 @@ const sqliteTableSetup = [
         CREATE TABLE IF NOT EXISTS CollectionOpened (
             cloID INTEGER PRIMARY KEY,
             clo_usrID INTEGER NOT NULL,
-            clo_docID INTEGER NOT NULL,
+            clo_colID INTEGER NOT NULL,
             cloCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             cloOpened TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             FOREIGN KEY (clo_usrID)
             REFERENCES User(usrID)
                 ON UPDATE CASCADE
                 ON DELETE CASCADE,
-            FOREIGN KEY (clo_docID)
+            FOREIGN KEY (clo_colID)
             REFERENCES Collection(colID)
                 ON UPDATE CASCADE
                 ON DELETE CASCADE,
-            UNIQUE(clo_usrID, clo_docID)
+            UNIQUE(clo_usrID, clo_colID)
         )
     `
 ];

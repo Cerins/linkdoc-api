@@ -48,6 +48,8 @@ export default async function collectionChecked(
         throw forbiddenError;
     }
     // Do not block the response handler because of metadata setting
+    // The metadata collection does not affect the response so should not be
+    // waited for in the event thread
     col.readBy(session.user.id).catch((err) => {
         session.logger.log('error', 'readBy error', {
             error: err

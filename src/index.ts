@@ -8,6 +8,11 @@ import { program } from 'commander';
 import ConsoleController from './controllers/console';
 import STDWriter from './utils/writer/std';
 import config from './config';
+import collectionDelete from './controllers/websocket/handlers/collections/delete';
+import collectionShare from './controllers/websocket/handlers/collections/share';
+import documentErase from './controllers/websocket/handlers/documents/erase';
+import documentWrite from './controllers/websocket/handlers/documents/write';
+import documentRead from './controllers/websocket/handlers/documents/read';
 
 
 async function main() {
@@ -30,6 +35,11 @@ async function main() {
             gateways
         })
             .registerHandler('COL.CREATE', collectionsCreate)
+            .registerHandler('COL.DELETE', collectionDelete)
+            .registerHandler('COL.SHARE', collectionShare)
+            .registerHandler('DOC.READ', documentRead)
+            .registerHandler('DOC.WRITE', documentWrite)
+            .registerHandler('DOC.ERASE', documentErase)
     };
     const consoleController = new ConsoleController({
         logger,

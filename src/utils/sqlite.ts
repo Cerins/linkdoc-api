@@ -16,7 +16,8 @@ async function buildDB(dependencies: Dependencies, upScripts?: string[]) {
     const db = knex({
         client: 'sqlite3',
         connection: {
-            filename
+            filename,
+            timezone: 'UTC'
         },
         log: {
             warn(message) {

@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import {
     IUserGateway,
-    UserGatewayType
+    UserGatewayType,
+    getCollectionListArgs
 } from '../gateways/interface/user';
 import { ICollectionType } from './interface/collection';
 import {
@@ -56,7 +57,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return await bcrypt.compare(password, hash);
         }
 
-        validatePassword(password: string) {
+        public validatePassword(password: string) {
             return User.compare(password, this.user.password);
         }
 
@@ -68,7 +69,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return User.dependencies;
         }
 
-        static async register(name: string, password: string) {
+        public static async register(name: string, password: string) {
             const user = new this.dependencies.gateways.User();
             user.name = name;
             user.password = await this.hash(password);
@@ -76,7 +77,7 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return new User(user);
         }
 
-        static async findOne({ id, name }: { id?: string; name?: string }) {
+        public static async findOne({ id, name }: { id?: string; name?: string }) {
             const user = await this.dependencies.gateways.User.findOne({
                 where: {
                     id,
@@ -89,13 +90,17 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return new User(user);
         }
 
-        async createCollection(name: string) {
+        public async createCollection(name: string) {
             const collectionRef = new this.dependencies.gateways.Collection();
             collectionRef.userID = this.id;
             collectionRef.visibility = ColVisibility.PRIVATE;
             collectionRef.name = name;
             await collectionRef.save();
             return new this.dependencies.models.Collection(collectionRef);
+        }
+
+        public async getCollectionList(...args: getCollectionListArgs) {
+            return this.user.getCollectionList(...args);
         }
     }
     return User;

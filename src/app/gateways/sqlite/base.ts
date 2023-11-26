@@ -58,13 +58,19 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
           // still more useless bytes are transferred over the network
           // I should update this class so that is saves which fields where updated or set
           const fullRecord: Record<string, unknown> = {};
+          function itemToValue(item: unknown) {
+              if(item instanceof Date) {
+                  return item.toISOString();
+              }
+              return item;
+          }
           Object.entries(physicalNames).forEach(([logical, physical]) => {
               if (logical === 'id') {
                   return;
               }
               const item = this._data.get(logical as any);
               if(item !== undefined) {
-                  fullRecord[physical as any] = item;
+                  fullRecord[physical as any] = itemToValue(item);
               }
           });
           if (cid === undefined) {

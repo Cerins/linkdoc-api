@@ -1,5 +1,9 @@
-import { Knex } from 'knex';
-import { IUserGateway } from '../interface/user';
+import { Knex, QueryBuilder } from 'knex';
+import {
+    IUserGateway,
+    getCollectionListArgs,
+    getCollectionListReturn
+} from '../interface/user';
 import defineBaseGateway from './base';
 interface Dependencies {
   db: Knex;
@@ -21,7 +25,42 @@ export default function defineUserGateway(dependencies: Dependencies) {
         }
     );
     class User extends Base implements IUserGateway {
-
+        public async getCollectionList(...args: getCollectionListArgs) {
+            const limit = args[0]?.limit;
+            const before = args[0]?.before;
+            const { id } = this;
+            let query = db
+                .select('*')
+                .from(function (this: any) {
+                    this.select({ colUUID: 'colUUID', time: db.raw('MAX(CL.time)') })
+                        .from(function (this: any) {
+                            this.select({ colID: 'clo_colID', time: 'cloOpened' })
+                                .from('CollectionOpened')
+                                .where('clo_usrID', id)
+                                .union(function (this: any) {
+                                    this.select({ colID: 'colID', time: 'colCreatedAt' })
+                                        .from('Collection')
+                                        .where('col_usrID', id);
+                                })
+                                .as('CL');
+                        })
+                        .innerJoin('Collection', 'Collection.colID', 'CL.colID')
+                        .groupBy('colUUID');
+                })
+                .orderBy('time', 'desc');
+            if (before !== undefined) {
+                query = query.where('time', '<', before);
+            }
+            query = query.orderBy('time', 'desc');
+            if (limit !== undefined) {
+                query = query.limit(limit);
+            }
+            const res = (await query) as getCollectionListReturn;
+            return res.map((v)=>({
+                ...v,
+                time: new Date(v.time)
+            }));
+        }
     }
     return User;
 }

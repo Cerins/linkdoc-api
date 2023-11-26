@@ -14,21 +14,7 @@ const collectionDelete: HandlerFn = errorHandler(async function (
     acknowledge
 ) {
     const { uuid } = await payloadSchema.parseAsync(payload);
-    const collection = await collectionChecked(this, uuid, null);
-    if(collection.userID !== this.user.id) {
-        throw new RequestError({
-            type: 'FORBIDDEN',
-            payload: {},
-            log: {
-                reason: 'collection forbidden',
-                uuid,
-                userID: {
-                    requested: collection.userID,
-                    actual: this.user.id
-                }
-            }
-        });
-    }
+    const collection = await collectionChecked(this, uuid, null, true);
     await collection.delete();
     this.emit(
         outputType(type, 'OK'),
