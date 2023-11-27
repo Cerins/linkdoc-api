@@ -266,6 +266,10 @@ export default function defineSocketController(dependencies: Dependencies) {
         }
 
         public onClose() {
+            // If in some room then disconnect
+            if(this.currentRoom !== null) {
+                this.leave(this.currentRoom);
+            }
             this.logger.log('info', 'Socket closed');
         }
 

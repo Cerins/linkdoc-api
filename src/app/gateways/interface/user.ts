@@ -4,8 +4,10 @@ type getCollectionList = (options?: {
     before?: Date
     limit?: number
 }) => Promise<{
-    colUUID: string,
+    uuid: string,
+    name: string,
     time: Date
+    user: string
 }[]>
 
 type getCollectionListArgs = Parameters<getCollectionList>

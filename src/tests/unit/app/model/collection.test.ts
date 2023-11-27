@@ -268,7 +268,7 @@ describe('Collection', () => {
             const cl = await user.getCollectionList();
             expect(cl.length).toBe(1);
             const item = cl[0];
-            expect(item.colUUID).toBe(collection.uuid);
+            expect(item.uuid).toBe(collection.uuid);
             expect(item.time.getTime()).toBeGreaterThan(ct.getTime());
         });
         test('Return nothing if limit is 0', async ()=>{
@@ -305,7 +305,7 @@ describe('Collection', () => {
             const cl = await user.getCollectionList();
             expect(cl.length).toBe(1);
             const item = cl[0];
-            expect(item.colUUID).toBe(collection.uuid);
+            expect(item.uuid).toBe(collection.uuid);
             expect(item.time.getTime()).toBeLessThan(ct.getTime());
         });
 

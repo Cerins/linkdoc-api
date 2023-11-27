@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 import { Knex, QueryBuilder } from 'knex';
 import {
     IUserGateway,
@@ -31,13 +32,17 @@ export default function defineUserGateway(dependencies: Dependencies) {
             const { id } = this;
             let query = db
                 .select('*')
-                .from(function (this: any) {
-                    this.select({ colUUID: 'colUUID', time: db.raw('MAX(CL.time)') })
-                        .from(function (this: any) {
+                .from(function (this: Knex.QueryBuilder) {
+                    this.select({
+                        uuid: 'colUUID',
+                        name: 'colName',
+                        user: 'usrName',
+                        time: db.raw('MAX(CL.time)') })
+                        .from(function (this: Knex.QueryBuilder) {
                             this.select({ colID: 'clo_colID', time: 'cloOpened' })
                                 .from('CollectionOpened')
                                 .where('clo_usrID', id)
-                                .union(function (this: any) {
+                                .union(function (this: Knex.QueryBuilder) {
                                     this.select({ colID: 'colID', time: 'colCreatedAt' })
                                         .from('Collection')
                                         .where('col_usrID', id);
@@ -45,6 +50,7 @@ export default function defineUserGateway(dependencies: Dependencies) {
                                 .as('CL');
                         })
                         .innerJoin('Collection', 'Collection.colID', 'CL.colID')
+                        .innerJoin('User', 'Collection.col_usrID', 'User.usrID')
                         .groupBy('colUUID');
                 })
                 .orderBy('time', 'desc');
