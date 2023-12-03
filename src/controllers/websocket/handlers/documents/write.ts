@@ -24,24 +24,29 @@ const documentWrite: HandlerFn = errorHandler(async function (
 ) {
     const { colUUID, docName, payload: docPayload } = await payloadSchema.parseAsync(payload);
     const col = await collectionChecked(this, colUUID, ColVisibility.WRITE);
-    let doc = await col.findDocument(docName);
-    if(doc === undefined) {
-        doc = await col.createDocument(docName);
+    const lock = await this.gateways.Lock.lock(`documents:${docName}`);
+    try{
+        let doc = await col.findDocument(docName);
+        if(doc === undefined) {
+            doc = await col.createDocument(docName);
+        }
+        const transform =  await doc.transform({
+            type: TransformType.WRITE,
+            payload: docPayload
+        });
+        this.emitRoom(
+            docRoom(colUUID, docName),
+            outputType(type, 'OK'),
+            {
+                colUUID,
+                docName,
+                transform
+            },
+            acknowledge
+        );
+    } finally {
+        await lock.unlock();
     }
-    const transform =  await doc.transform({
-        type: TransformType.WRITE,
-        payload: docPayload
-    });
-    this.emitRoom(
-        docRoom(colUUID, docName),
-        outputType(type, 'OK'),
-        {
-            colUUID,
-            docName,
-            transform
-        },
-        acknowledge
-    );
 });
 
 export default documentWrite;

@@ -2,7 +2,6 @@ import { z } from 'zod';
 import errorHandler from '../../utils/error/handler';
 import outputType from '../../utils/outputType';
 import { HandlerFn } from '..';
-import RequestError from '../../utils/error/request';
 import collectionChecked from '../../utils/findCollection';
 
 const payloadSchema = z.object({

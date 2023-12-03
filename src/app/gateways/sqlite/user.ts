@@ -21,7 +21,8 @@ export default function defineUserGateway(dependencies: Dependencies) {
             physicalNames: {
                 id: 'usrID',
                 name: 'usrName',
-                password: 'usrPassword'
+                password: 'usrPassword',
+                createdAt: 'usrCreatedAt'
             }
         }
     );

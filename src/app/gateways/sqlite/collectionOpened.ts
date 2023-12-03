@@ -17,7 +17,8 @@ export default function defineCollectionOpenedGateway(dependencies: Dependencies
                 id: 'cloID',
                 userID: 'clo_usrID',
                 collectionID: 'clo_colID',
-                opened: 'cloOpened'
+                opened: 'cloOpened',
+                createdAt: 'cloCreatedAt'
             }
         }
     );

@@ -16,6 +16,7 @@ type getCollectionListReturn = Awaited<ReturnType<getCollectionList>>
 interface IUserGateway extends IObjectGateway {
   name: string;
   password: string;
+  createdAt: Date;
   getCollectionList(...args: getCollectionListArgs): Promise<getCollectionListReturn>
 }
 

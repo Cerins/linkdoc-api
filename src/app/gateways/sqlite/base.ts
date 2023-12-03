@@ -26,6 +26,7 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
   class Base {
       private _data = new Map<keyof B, B[keyof B]>();
       constructor() {
+          this._data.set('createdAt' as any, (new Date()) as any);
           (Object.keys(physicalNames) as (keyof B)[]).forEach((property) => {
               Object.defineProperty(this, property, {
                   get: () => {

@@ -6,6 +6,7 @@ import type { HandlerFn } from './handlers';
 import { v4 } from 'uuid';
 import { PubSubGatewayType } from '../../app/gateways/interface/pubsub';
 import { ICollectionType } from '../../app/models/interface/collection';
+import { LockGatewayType } from '../../app/gateways/interface/lock';
 
 interface ISocket {
   on(event: string, callback: (...args: unknown[]) => void): void;
@@ -54,7 +55,8 @@ interface Dependencies {
     Collection: ICollectionType;
   };
   gateways: {
-    PubSub: PubSubGatewayType
+    PubSub: PubSubGatewayType,
+    Lock: LockGatewayType
   }
 }
 
@@ -137,12 +139,16 @@ export default function defineSocketController(dependencies: Dependencies) {
 
         // Each session can be only connected to one room
         // Or in other words each session can view the updates for only one document
-        // That is the assupmtion.
-        // If that changes, change this implmentation to support multiple rooms
+        // That is the assumption.
+        // If that changes, change this implementation to support multiple rooms
         private currentRoom: string | null = null;
 
         public get models() {
             return dependencies.models;
+        }
+
+        public get gateways() {
+            return dependencies.gateways;
         }
 
         public get logger() {

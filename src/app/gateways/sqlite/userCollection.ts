@@ -17,7 +17,8 @@ export default function defineUserCollectionGateway(dependencies: Dependencies) 
                 id: 'uclID',
                 userID: 'ucl_usrID',
                 collectionID: 'ucl_colID',
-                visibility: 'uclVisibility'
+                visibility: 'uclVisibility',
+                createdAt: 'uclCreatedAt'
             }
         }
     );

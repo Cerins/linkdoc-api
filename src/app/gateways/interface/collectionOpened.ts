@@ -4,6 +4,7 @@ interface ICollectionOpenedGateway extends IObjectGateway {
     userID: string;
     collectionID: string;
     opened: Date
+    createdAt: Date
 }
 
 interface CollectionOpenedGatewayType

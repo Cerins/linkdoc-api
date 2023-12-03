@@ -10,7 +10,7 @@ const sqliteTableSetup = [
             usrID INTEGER PRIMARY KEY,
             usrName TEXT NOT NULL UNIQUE,
             usrPassword TEXT NOT NULL,
-            usrCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            usrCreatedAt TIMESTAMP NOT NULL
         );
     `,
     // Choosing to add index to colName and col_usrID
@@ -25,7 +25,7 @@ const sqliteTableSetup = [
             colDescription TEXT,
             col_usrID INTEGER NOT NULL,
             colVisibility TINYINT NOT NULL,
-            colCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            colCreatedAt TIMESTAMP NOT NULL,
             FOREIGN KEY (col_usrID)
             REFERENCES User(usrID)
                 ON UPDATE CASCADE
@@ -44,7 +44,7 @@ const sqliteTableSetup = [
             uclID INTEGER PRIMARY KEY,
             ucl_usrID INTEGER NOT NULL,
             ucl_colID INTEGER NOT NULL,
-            uclCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            uclCreatedAt TIMESTAMP NOT NULL,
             uclVisibility TINYINT NOT NULL,
             FOREIGN KEY (ucl_usrID)
             REFERENCES User(usrID)
@@ -81,7 +81,7 @@ const sqliteTableSetup = [
             cloID INTEGER PRIMARY KEY,
             clo_usrID INTEGER NOT NULL,
             clo_colID INTEGER NOT NULL,
-            cloCreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            cloCreatedAt TIMESTAMP NOT NULL,
             cloOpened TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
             FOREIGN KEY (clo_usrID)
             REFERENCES User(usrID)

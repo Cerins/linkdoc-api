@@ -40,7 +40,7 @@ const create: HandlerFn = errorHandler(async function (
         {
             uuid: collection.uuid,
             name: collection.name,
-            owner: this.user.name,
+            user: this.user.name,
             visibility: collection.visibility,
             description: collection.description
         },
