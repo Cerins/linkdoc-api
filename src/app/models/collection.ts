@@ -1,3 +1,4 @@
+import { CacheGatewayType } from '../gateways/interface/cache';
 import type {
     ColVisibility,
     CollectionGatewayType,
@@ -6,6 +7,7 @@ import type {
 import { CollectionOpenedGatewayType } from '../gateways/interface/collectionOpened';
 import { DocumentGatewayType } from '../gateways/interface/document';
 import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
+import { defineDocumentCache } from './document';
 import type { ICollection } from './interface/collection';
 import type { IDocumentType } from './interface/document';
 
@@ -15,12 +17,15 @@ interface Dependencies {
         UserCollection: UserCollectionGatewayType
         Document: DocumentGatewayType
         CollectionOpened: CollectionOpenedGatewayType
+        Cache: CacheGatewayType
     },
     models: {
         Document: IDocumentType
     }
 }
 export default function defineCollection(dependencies: Dependencies) {
+    const documentsCache = defineDocumentCache(dependencies);
+
     class Collection implements ICollection {
         private collection: ICollectionGateway;
 
@@ -132,14 +137,9 @@ export default function defineCollection(dependencies: Dependencies) {
         }
 
         public async findDocument(name: string) {
-            const item = await this.dependencies.gateways.Document.findOne({
-                where: {
-                    name,
-                    collectionID: this.id
-                }
-            });
-            if(item === undefined) { return undefined; }
-            return new this.dependencies.models.Document(item);
+            const item = await documentsCache.get(`${this.id}:${name}`);
+            if(item === null) {return undefined;}
+            return new this.dependencies.models.Document(item as any);
         }
         public async createDocument(name: string) {
             const item = new this.dependencies.gateways.Document();

@@ -47,6 +47,7 @@ export default function defineBaseGateway<T extends unknown & { id: string }>(
       }
 
       public link(linker: Record<keyof B, B[keyof B]>) {
+          if(linker === null) {return;}
           Object.entries(linker).forEach(([key, val]) => {
               (this as any)[key] = val;
           });

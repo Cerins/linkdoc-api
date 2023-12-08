@@ -1,4 +1,5 @@
 import config from '../../config';
+import { CacheGatewayType } from '../gateways/interface/cache';
 import type { CollectionGatewayType } from '../gateways/interface/collection';
 import { CollectionOpenedGatewayType } from '../gateways/interface/collectionOpened';
 import type { DocumentGatewayType } from '../gateways/interface/document';
@@ -18,6 +19,7 @@ interface Dependencies {
     UserCollection: UserCollectionGatewayType;
     Document: DocumentGatewayType;
     CollectionOpened: CollectionOpenedGatewayType;
+    Cache: CacheGatewayType;
   };
 }
 
