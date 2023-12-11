@@ -44,15 +44,15 @@ async function buildDB(dependencies: Dependencies, upScripts?: string[]) {
 
     });
     db.on('query', (query) => {
-        // dependencies.logger.log('info', 'SQLITE QUERY', {
-        //     query: {
-        //         method: query.method,
-        //         sql: query.sql
-        //         // Do not want to see this this is potentially sensitive
-        //         // bindings: query.bindings
-        //         // Or in other words: "speak no evil"
-        //     }
-        // });
+        dependencies.logger.log('info', 'SQLITE QUERY', {
+            query: {
+                method: query.method,
+                sql: query.sql
+                // Do not want to see this this is potentially sensitive
+                // bindings: query.bindings
+                // Or in other words: "speak no evil"
+            }
+        });
     });
     // Run setup scripts
     if (upScripts && upScripts.length > 0) {

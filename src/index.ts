@@ -18,6 +18,18 @@ import collectionRead from './controllers/websocket/handlers/collections/read';
 
 async function main() {
     const logger = createLogger();
+    process.on('uncaughtException', (e)=>{
+        logger.log('error',
+            'Unhandled exception',
+            {
+                error: {
+                    message: e.message,
+                    stack: e.stack,
+                    name: e.name
+                }
+            }
+        );
+    });
     const gateways = await SQLiteGateways.create(logger);
     const models = new Models({
         gateways
@@ -88,8 +100,4 @@ async function main() {
     await program.parseAsync(process.argv);
 }
 
-main().catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error(err);
-    process.exit(0);
-});
+main();
