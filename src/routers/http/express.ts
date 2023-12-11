@@ -1,7 +1,7 @@
 import express from 'express';
-import type { HTTPUserControllerType } from '../../controllers/http/user';
-
+import cors from 'cors';
 import { ZodError } from 'zod';
+import type { HTTPUserControllerType } from '../../controllers/http/user';
 import ILogger from '../../utils/interface/logger';
 import ResponseHelper, {
     INext,
@@ -59,7 +59,9 @@ class ExpressAPI {
     }
 
     protected initMiddlewares() {
-    // Setup json body parser
+        // Setup json body parser
+        // TODO cors
+        this.app.use(cors());
         this.app.use(express.json());
         // Setup logger middleware
         this.app.use((req, res, next) => {
@@ -94,7 +96,7 @@ class ExpressAPI {
     }
 
     protected initErrorHandlers() {
-    // Register not found handler
+        // Register not found handler
         this.app.use((req: IReq, res: IRes, next) => {
             const { logger } = res.locals;
             logger.log('warn', 'Not found');
