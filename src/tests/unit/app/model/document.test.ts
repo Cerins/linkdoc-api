@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import Models from '../../../../app/models';
 import SQLiteGateways from '../../../../app/gateways/sqlite';
 import { IDocument, TransformType } from '../../../../app/models/interface/document';
+import { defineDocumentCache, defineTransformCache } from '../../../../app/models/document';
 
 const usrName = 'name';
 const usrPassword = 'password';
@@ -26,6 +27,7 @@ describe('Document', () => {
         const gateways = await SQLiteGateways.create({
             log: () => {}
         });
+        await gateways.Cache.reset();
         models = new Models({
             gateways
         });
@@ -150,5 +152,119 @@ describe('Document', () => {
                 expect(document.text).toBe('0456789');
             });
         });
+    });
+    describe('transform moves', () => {
+        describe('WRTIE', () => {
+            test('Correct move if write', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: '456',
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 1,
+                        text: '123',
+                        sid: 4
+                    }
+                });
+                expect(document.text).toBe('456a123bc');
+            });
+            test('Correct move write if erase', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 0,
+                        count: 1,
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 2,
+                        text: '123',
+                        sid: 4
+                    }
+                });
+                expect(document.text).toBe('b123c');
+            });
+            test('Not correct write if after write', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: '456',
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 1,
+                        text: '123',
+                        sid: 6
+                    }
+                });
+                expect(document.text).toBe('412356abc');
+            });
+            test('Not correct write if after erase', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 0,
+                        count: 1,
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 2,
+                        text: '123',
+                        sid: 6
+                    }
+                });
+                expect(document.text).toBe('bc123');
+            });
+        });
+        // describe('ERASE', () => {
+        // });
     });
 });

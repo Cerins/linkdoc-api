@@ -22,17 +22,24 @@ const documentRead: HandlerFn = errorHandler(async function (
         name: docName,
         text: ''
     };
-    const doc = await col.findDocument(docName);
-    if(doc !== undefined) {
-        documentForRes.name = doc.name;
-        documentForRes.text = doc.text;
+    // Lock is needed to forbid document changes while someone is reading
+    // Funny
+    const lock = await this.gateways.Lock.lock(`documents:${docName}`);
+    try{
+        const doc = await col.findDocument(docName);
+        if(doc !== undefined) {
+            documentForRes.name = doc.name;
+            documentForRes.text = doc.text;
+        }
+        this.join(docRoom(colUUID, docName));
+        this.emit(
+            outputType(type, 'OK'),
+            documentForRes,
+            acknowledge
+        );
+    } finally {
+        await lock.unlock();
     }
-    this.join(docRoom(colUUID, docName));
-    this.emit(
-        outputType(type, 'OK'),
-        documentForRes,
-        acknowledge
-    );
 });
 
 export default documentRead;

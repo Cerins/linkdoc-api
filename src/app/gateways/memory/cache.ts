@@ -20,6 +20,7 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
     string,
     {
       value: JSONValue;
+      name: string;
       timeout: ReturnType<typeof setInterval> | null;
     }
   >();
@@ -54,6 +55,7 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
         }
         CacheInner.cached.set(fname, {
             value,
+            name,
             timeout:
         actualTimeout === null
             ? null
@@ -74,13 +76,18 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
         CacheInner.cached.delete(fname);
     }
 
+    public static async reset() {
+        CacheInner.cached.clear();
+    }
+
     public async get(
         name: string,
         timeout?: number | undefined
     ): Promise<JSONValue> {
         const fname = this.fullName(name);
-        const cached = CacheInner.cached.get(fname);
-        if (cached === undefined && this.resolver) {
+        const has = CacheInner.cached.has(fname);
+        if(has) {return CacheInner.cached.get(fname)!.value;}
+        if (this.resolver) {
             // First we resolve
             const value = await this.resolver(name);
             // Then we set this value
@@ -88,7 +95,7 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
             // And then we return
             return value;
         }
-        return cached?.value ?? null;
+        return null;
     }
 };
 

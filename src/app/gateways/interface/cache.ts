@@ -21,4 +21,6 @@ export interface CacheGatewayType {
   // TODO add description
   // Use https://www.npmjs.com/package/bowser as reference how to write proper JSDOC
   new (options?: CacheOptions): ICacheGateway;
+  // Warning clears all keys
+  reset (): Promise<void>
 }

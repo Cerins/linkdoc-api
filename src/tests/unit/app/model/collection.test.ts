@@ -4,6 +4,7 @@ import SQLiteGateways from '../../../../app/gateways/sqlite';
 import { ColVisibility } from '../../../../app/gateways/interface/collection';
 import GatewayError from '../../../../app/gateways/utils/error';
 import sleep from '../../../../utils/sleep';
+import { defineDocumentCache, defineTransformCache } from '../../../../app/models/document';
 
 const usrName = 'name';
 const usrPassword = 'password';
@@ -24,6 +25,7 @@ describe('Collection', () => {
         const gateways = await SQLiteGateways.create({
             log: () => {}
         });
+        await gateways.Cache.reset();
         models = new Models({
             gateways
         });

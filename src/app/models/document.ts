@@ -1,3 +1,4 @@
+import { JSONArray, JSONValue } from '../../utils/json';
 import { CacheGatewayType, ICacheGateway } from '../gateways/interface/cache';
 import {
     IDocumentGateway,
@@ -18,7 +19,6 @@ interface Dependencies {
   };
 }
 
-let documentsCacheSingleton: ICacheGateway | undefined;
 
 // Create a singleton
 export function defineDocumentCache(dependencies: {
@@ -27,11 +27,8 @@ export function defineDocumentCache(dependencies: {
     Cache: CacheGatewayType;
   };
 }) {
-    if (documentsCacheSingleton !== undefined) {
-        return documentsCacheSingleton;
-    }
     const { Cache, Document } = dependencies.gateways;
-    documentsCacheSingleton = new Cache({
+    return new Cache({
         namespace: 'documents',
         timeout: 10000,
         resolver: async (name) => {
@@ -54,17 +51,34 @@ export function defineDocumentCache(dependencies: {
                 text: item.text
             };
         },
-        backuper: async (name, value: any) => {
+        backuper: async (name, value: any | null) => {
+            if(value === null) {return;}
             const document = new Document();
             document.link(value);
             await document.save();
         }
     });
-    return documentsCacheSingleton;
+}
+
+export function defineTransformCache(dependencies: {
+  gateways: {
+    Document: DocumentGatewayType;
+    Cache: CacheGatewayType;
+  };
+}) {
+    const { Cache } = dependencies.gateways;
+    return new Cache({
+        namespace: 'documents:transforms',
+        timeout: 10000,
+        resolver: async (name) => {
+            return [];
+        }
+    });
 }
 
 export default function defineDocument(dependencies: Dependencies) {
     const documentsCache = defineDocumentCache(dependencies);
+    const transformsCache = defineTransformCache(dependencies);
     class Document implements IDocument {
         private document: IDocumentGateway;
 
@@ -88,7 +102,50 @@ export default function defineDocument(dependencies: Dependencies) {
             return this.document.collectionID;
         }
         protected async ot(transform: Transform) {
-            // TODO write this algorithm
+            const { collectionID, name } = this.document;
+            let pastTransforms
+                        =  (await transformsCache
+                            .get(
+                                `${collectionID}:${name}`
+                            )) as unknown as Transform[];
+
+
+            // Currently only support these types
+            if (transform.type === TransformType.WRITE || transform.type === TransformType.ERASE) {
+                pastTransforms.forEach((other) => {
+                    // Skip processing for transforms that happened after the transform
+                    // TODO = is here to make sure that old tests do not break,
+                    // but it might be better behavior if this is removed
+                    // this needs to be experimented with
+                    if (other.payload.sid <= transform.payload.sid) {
+                        return;
+                    }
+                    if(
+                        other.type === TransformType.WRITE
+                        && other.payload.index <= transform.payload.index
+                        && other.payload.sid >= transform.payload.sid
+                    ) {
+                        transform.payload.index += other.payload.text.length;
+                    }
+                    if(
+                        other.type === TransformType.ERASE
+                        && other.payload.index < transform.payload.index
+                        && other.payload.sid >= transform.payload.sid
+                    ) {
+                        transform.payload.index -= other.payload.count;
+                    }
+
+
+                });
+            }
+
+            pastTransforms.push(transform);
+            // Only needed to discard old items
+            pastTransforms.sort((a, b) => a.payload.sid - b.payload.sid ? 1 : -1);
+            pastTransforms = pastTransforms.slice(0, 101);
+            await transformsCache.set(
+                `${collectionID}:${name}`, pastTransforms as unknown as JSONValue
+            );
             return transform;
         }
         public async transform(transformRaw: Transform) {

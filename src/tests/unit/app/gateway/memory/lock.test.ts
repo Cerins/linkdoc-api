@@ -19,6 +19,7 @@ describe('Lock memory', ()=>{
         const pr2 = Lock.lock('test');
         pr1.then(()=>log('pr1'));
         await pr1;
+        pr2.catch(()=>{});
         expect(log).toHaveBeenCalledOnce();
         expect(log).toHaveBeenCalledWith('pr1');
     });
