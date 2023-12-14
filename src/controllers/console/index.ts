@@ -58,7 +58,7 @@ class ConsoleController {
         const httpRouter = new ExpressAPI({
             ...this.dependencies,
             config: {
-                port: this.dependencies.config.routers.http.port
+                ...this.dependencies.config.routers.http
             }
         });
         await httpRouter.start();

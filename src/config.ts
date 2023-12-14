@@ -20,7 +20,23 @@ const schema = z.object({
     controllers: z.object({}),
     routers: z.object({
         http: z.object({
-            port: z.number().gt(0)
+            cors:  z.object({
+                origin: z.string()
+            }),
+            port: z.number().gt(0),
+            session: z.object({
+                secret: z.string(),
+                cookie: z.object({
+                    maxAge: z.number().gt(0),
+                    secure: z.boolean(),
+                    httpOnly: z.boolean(),
+                    sameSite: z.union([
+                        z.literal('none'),
+                        z.literal('strict'),
+                        z.literal('lax')
+                    ])
+                })
+            })
         }),
         websocket: z.object({
             port: z.number().gt(0)
@@ -33,7 +49,6 @@ const schema = z.object({
         })
     })
 });
-
 const config = schema.parse(rawConfig);
 
 type Config = typeof config

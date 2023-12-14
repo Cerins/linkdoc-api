@@ -18,7 +18,21 @@ export = {
         controllers: {},
         routers: {
             http: {
-                port: 3000
+                cors: {
+                    origin: ''
+                },
+                port: 3000,
+                // The secret of the session, allow to validate incoming
+                session: {
+                    secret: '',
+                    cookie: {
+                        maxAge: 24*60*60*1000, // 24 hours
+                        // Force cookies over https
+                        secure: true,
+                        httpOnly: true,
+                        sameSite: 'strict'
+                    }
+                }
             },
             websocket: {
                 port: 3001

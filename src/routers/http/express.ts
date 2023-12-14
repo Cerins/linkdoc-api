@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session';
 import cors from 'cors';
 import { ZodError } from 'zod';
 import type { HTTPUserControllerType } from '../../controllers/http/user';
@@ -16,7 +17,19 @@ interface Dependencies {
   };
   logger: ILogger;
   config: {
+    cors: {
+        origin: string
+    },
     port: number;
+    session: {
+        secret: string
+        cookie: {
+            maxAge: number,
+            secure: boolean
+            httpOnly: boolean,
+            sameSite: 'lax' | 'strict' | 'none'
+        }
+    }
   };
 }
 
@@ -61,8 +74,23 @@ class ExpressAPI {
     protected initMiddlewares() {
         // Setup json body parser
         // TODO cors
-        this.app.use(cors());
+        this.app.use(cors({
+            methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
+            credentials: true,
+            origin: this.config.cors.origin
+        }));
         this.app.use(express.json());
+        // TODO use redis when appropriate
+        this.app.use(session({
+            secret: this.config.session.secret,
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                path: '/',
+                ...this.config.session.cookie
+            }
+
+        }));
         // Setup logger middleware
         this.app.use((req, res, next) => {
             // Make so that the logger appends request info to the log
@@ -93,6 +121,9 @@ class ExpressAPI {
     protected initRoutes() {
         const { HTTPUserController } = this.dependencies.controllers;
         this.app.post('/auth/login', HTTPUserController.login);
+        this.app.post('/auth/session', HTTPUserController.session);
+        this.app.post('/auth/logout', HTTPUserController.logout);
+
     }
 
     protected initErrorHandlers() {

@@ -4,6 +4,7 @@ interface IReq {
   body: unknown;
   params: unknown;
   query: unknown;
+  session: unknown
 }
 
 type LogData = {
