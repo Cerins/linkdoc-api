@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import Lock from '../../../../../app/gateways/memory/lock';
 
 describe('Lock memory', ()=>{

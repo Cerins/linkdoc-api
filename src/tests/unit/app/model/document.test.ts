@@ -154,7 +154,7 @@ describe('Document', () => {
         });
     });
     describe('transform moves', () => {
-        describe('WRTIE', () => {
+        describe('WRITE', () => {
             test('Correct move if write', async()=>{
                 await document.transform({
                     type: TransformType.WRITE,
@@ -264,7 +264,115 @@ describe('Document', () => {
                 expect(document.text).toBe('bc123');
             });
         });
-        // describe('ERASE', () => {
-        // });
+        describe('ERASE', () => {
+            test('Correct move if write', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: '456',
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 1,
+                        count: 2,
+                        sid: 4
+                    }
+                });
+                expect(document.text).toBe('456a');
+            });
+            test('Correct move write if erase', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 0,
+                        count: 1,
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 1,
+                        count: 1,
+                        sid: 4
+                    }
+                });
+                expect(document.text).toBe('c');
+            });
+            test('Not correct erase if after write', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abc',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: '456',
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 0,
+                        count: 3,
+                        sid: 6
+                    }
+                });
+                expect(document.text).toBe('abc');
+            });
+            test('Not correct erase if after erase', async()=>{
+                await document.transform({
+                    type: TransformType.WRITE,
+                    payload: {
+                        index: 0,
+                        text: 'abcd',
+                        sid: 0
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 0,
+                        count: 1,
+                        sid: 5
+                    }
+                });
+                await document.transform({
+                    type: TransformType.ERASE,
+                    payload: {
+                        index: 1,
+                        count:1,
+                        sid: 6
+                    }
+                });
+                expect(document.text).toBe('bd');
+            });
+        });
     });
 });

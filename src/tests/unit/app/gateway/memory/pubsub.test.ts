@@ -13,7 +13,7 @@ const id2 = 'id2';
 // since their interface is the same
 // although running tests with outside systems
 // is a "shady" things, since the tests are run as multiple processes
-// tests can be unstable state
+// tests can be in an unstable state
 describe('PubSub memory', ()=>{
     const cb1 = vi.fn();
     const cb2 = vi.fn();
