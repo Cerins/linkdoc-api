@@ -48,6 +48,7 @@ interface IWebSocketServer {
 interface Dependencies {
   config: {
     baseUrl: string;
+    trustProxy: boolean;
   };
   logger: ILogger;
   models: {
@@ -324,8 +325,15 @@ export default function defineSocketController(dependencies: Dependencies) {
                         user
                     );
                     this.handleUpgrade(request, socket, head, (ws) => {
+                        let ip = request.socket.remoteAddress ?? null;
+                        if(dependencies.config.trustProxy) {
+                            const forwardedFor = request.headers['x-forwarded-for'];
+                            if(typeof forwardedFor === 'string') {
+                                ip = forwardedFor;
+                            }
+                        }
                         const socketController = new SocketController(ws, user, {
-                            ip: request.socket.remoteAddress ?? null
+                            ip
                         });
                         this.emit('connection', socketController);
                     });

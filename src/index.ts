@@ -41,8 +41,7 @@ async function main() {
         }),
         SocketController: defineSocketController({
             config: {
-                // TODO - Setup config
-                baseUrl: 'http://localhost:3000'
+                ...config.controllers.websocket
             },
             logger,
             models,

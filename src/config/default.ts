@@ -15,12 +15,18 @@ export = {
                 }
             }
         },
-        controllers: {},
+        controllers: {
+            websocket: {
+                trustProxy: false,
+                baseUrl: 'http://localhost:3001'
+            }
+        },
         routers: {
             http: {
                 cors: {
                     origin: ''
                 },
+                trustProxy: false,
                 port: 3000,
                 // The secret of the session, allow to validate incoming
                 session: {

@@ -17,12 +17,18 @@ const schema = z.object({
             })
         })
     }),
-    controllers: z.object({}),
+    controllers: z.object({
+        websocket: z.object({
+            trustProxy: z.boolean(),
+            baseUrl: z.string()
+        })
+    }),
     routers: z.object({
         http: z.object({
             cors:  z.object({
                 origin: z.string()
             }),
+            trustProxy: z.boolean(),
             port: z.number().gt(0),
             session: z.object({
                 secret: z.string(),

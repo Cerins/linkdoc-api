@@ -21,6 +21,7 @@ interface Dependencies {
     cors: {
         origin: string
     },
+    trustProxy: boolean,
     port: number;
     session: {
         secret: string
@@ -75,6 +76,7 @@ class ExpressAPI {
     protected initMiddlewares() {
         // Setup json body parser
         // TODO cors
+        this.app.set('trust proxy', this.config.trustProxy);
         this.app.use(cors({
             methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
             credentials: true,
