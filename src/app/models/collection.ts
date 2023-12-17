@@ -1,4 +1,4 @@
-import { CacheGatewayType } from '../gateways/interface/cache';
+import { CacheGatewayType, ICacheGateway } from '../gateways/interface/cache';
 import type {
     ColVisibility,
     CollectionGatewayType,
@@ -28,6 +28,11 @@ export default function defineCollection(dependencies: Dependencies) {
 
     class Collection implements ICollection {
         private collection: ICollectionGateway;
+
+        // This map was chosen instead of a full fledged cache
+        // Because cache would be an overkill for this use case -
+        // remembering the accessLevel of a collection that was just checked
+        private usrAccessCache = new Map<string, ColVisibility>();
 
         private static get dependencies() {
             return dependencies;
@@ -65,13 +70,40 @@ export default function defineCollection(dependencies: Dependencies) {
             return this.collection.description;
         }
 
+        public get defaultDocument() {
+            return this.collection.defaultDocument;
+        }
+
+        public async accessLevel(usrID?: string): Promise<ColVisibility> {
+            if(usrID === undefined) {
+                return this.visibility;
+            }
+            const cached = this.usrAccessCache.get(usrID);
+            if(cached !== undefined) {
+                return cached;
+            }
+            const al = await this.collection.accessLevel(usrID);
+            this.usrAccessCache.set(usrID, al);
+            return al;
+        }
+
         public async hasAccessLevel(level: ColVisibility, usrID?: string) {
-            return this.collection.hasAccessLevel(level, usrID);
+            const al = await this.accessLevel(usrID);
+            return al >= level;
+        }
+
+        private async clearVisibilityCache() {
+            this.usrAccessCache.clear();
         }
 
         public async setVisibility(visibility: ColVisibility) {
             this.collection.visibility = visibility;
-            await this.collection.save();
+            await Promise.all(
+                [
+                    this.clearVisibilityCache(),
+                    this.collection.save()
+                ]
+            );
         }
 
         public async setAccess(usrID: string, visibility: ColVisibility) {
@@ -97,7 +129,12 @@ export default function defineCollection(dependencies: Dependencies) {
                 usrCol.userID = usrID;
             }
             usrCol.visibility = visibility;
-            await usrCol.save();
+            await Promise.all(
+                [
+                    usrCol.save(),
+                    this.clearVisibilityCache()
+                ]
+            );
         }
 
         public async delete(){

@@ -38,6 +38,7 @@ export default function defineUserGateway(dependencies: Dependencies) {
                         uuid: 'colUUID',
                         name: 'colName',
                         user: 'usrName',
+                        defaultDocument: 'colDefaultDocument',
                         time: db.raw('MAX(CL.time)') })
                         .from(function (this: Knex.QueryBuilder) {
                             this.select({ colID: 'clo_colID', time: 'cloOpened' })

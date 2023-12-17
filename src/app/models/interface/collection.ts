@@ -8,7 +8,9 @@ interface ICollection {
     userID: string;
     visibility: ColVisibility,
     description: string | null,
+    defaultDocument: string | null,
     hasAccessLevel(level: ColVisibility, usrID?: string): Promise<boolean>;
+    accessLevel(usrID?: string): Promise<ColVisibility>;
     setAccess(usrID: string, visibility: ColVisibility): Promise<void>;
     setVisibility(visibility: ColVisibility): Promise<void>;
     findDocument(name: string): Promise<IDocument | undefined>;

@@ -16,11 +16,14 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
 
     private namespace?: string;
 
+    private names: Set<string> = new Set();
+
     private static cached = new Map<
     string,
     {
       value: JSONValue;
       name: string;
+      backup: boolean;
       timeout: ReturnType<typeof setInterval> | null;
     }
   >();
@@ -42,8 +45,10 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
     public async set(
         name: string,
         value: JSONValue,
-        timeout?: number | undefined
+        timeout?: number | undefined,
+        backup?: boolean
     ): Promise<void> {
+        this.names.add(name);
         const fname = this.fullName(name);
         const actualTimeout = timeout ?? this.timeout ?? null;
         // Then we check if there is ongoing timeout
@@ -61,19 +66,33 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
             ? null
             : setTimeout(() => {
                 this.cleanup(name);
-            }, actualTimeout)
+            }, actualTimeout),
+            backup: backup ?? true
         });
+    }
+
+    public async del(name: string): Promise<void> {
+        this.cleanup(name);
     }
 
     // Remove the value
     private async cleanup(name: string) {
+        this.names.delete(name);
         const fname = this.fullName(name);
         // Check if there is a backuper( a way of moving the item to non-volatile storage)
         const cached = CacheInner.cached.get(fname)!;
-        if (this.backuper) {
+        if (this.backuper && cached.backup) {
             await this.backuper(name, cached.value);
         }
         CacheInner.cached.delete(fname);
+    }
+
+    public async clear() {
+        await Promise.all(
+            [...this.names].map(async (name) => {
+                await this.cleanup(name);
+            })
+        );
     }
 
     public static async reset() {
@@ -91,7 +110,7 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
             // First we resolve
             const value = await this.resolver(name);
             // Then we set this value
-            this.set(name, value, timeout);
+            this.set(name, value, timeout, false);
             // And then we return
             return value;
         }

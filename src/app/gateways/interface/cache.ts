@@ -5,6 +5,8 @@ export interface ICacheGateway {
   get(name: string, timeout?: number): Promise<JSONValue>;
   // Set the value which is stored in cached
   set(name: string, value: JSONValue, timeout?: number): Promise<void>;
+  del(name: string): Promise<void>;
+  clear(): Promise<void>;
 }
 
 export type ValueResolver = (name: string) => Promise<JSONValue>;
@@ -22,5 +24,6 @@ export interface CacheGatewayType {
   // Use https://www.npmjs.com/package/bowser as reference how to write proper JSDOC
   new (options?: CacheOptions): ICacheGateway;
   // Warning clears all keys
+  // Without backup, even with backuper
   reset (): Promise<void>
 }

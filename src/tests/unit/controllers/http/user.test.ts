@@ -69,7 +69,8 @@ describe('HTTP User controller', () => {
                     password: wrongUsrInfo.password
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).toHaveBeenCalledTimes(1);
@@ -82,7 +83,8 @@ describe('HTTP User controller', () => {
                     password: usrInfo.password
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).toHaveBeenCalledTimes(1);
@@ -95,7 +97,8 @@ describe('HTTP User controller', () => {
                     password: usrInfo.password
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).not.toHaveBeenCalled();
@@ -122,7 +125,8 @@ describe('HTTP User controller', () => {
                     password: usrInfo.password
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).toHaveBeenCalledTimes(1);
@@ -135,7 +139,8 @@ describe('HTTP User controller', () => {
                     password: 123
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).toHaveBeenCalledTimes(1);
@@ -147,7 +152,8 @@ describe('HTTP User controller', () => {
                     password: usrInfo.password
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).toHaveBeenCalledTimes(1);
@@ -159,7 +165,8 @@ describe('HTTP User controller', () => {
                     username: usrInfo.name
                 },
                 params: {},
-                query: {}
+                query: {},
+                session: {}
             };
             await HTTPUserController.login(req, res, nextMock);
             expect(nextMock).toHaveBeenCalledTimes(1);

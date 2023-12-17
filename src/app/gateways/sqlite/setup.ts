@@ -22,9 +22,10 @@ const sqliteTableSetup = [
             colID INTEGER PRIMARY KEY,
             colUUID TEXT NOT NULL UNIQUE,
             colName TEXT NOT NULL,
-            colDescription TEXT,
+            colDescription TEXT NULL,
             col_usrID INTEGER NOT NULL,
             colVisibility TINYINT NOT NULL,
+            colDefaultDocument TEXT NULL,
             colCreatedAt TIMESTAMP NOT NULL,
             FOREIGN KEY (col_usrID)
             REFERENCES User(usrID)

@@ -8,6 +8,7 @@ type getCollectionList = (options?: {
     name: string,
     time: Date
     user: string
+    defaultDocument: string | null
 }[]>
 
 type getCollectionListArgs = Parameters<getCollectionList>

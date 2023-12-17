@@ -22,7 +22,9 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
                 description: 'colDescription',
                 createdAt: 'colCreatedAt',
                 userID: 'col_usrID',
-                visibility: 'colVisibility'
+                visibility: 'colVisibility',
+                defaultDocument: 'colDefaultDocument'
+
             }
         }
     );
@@ -37,11 +39,7 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
             }
             await super.save();
         }
-        public async hasAccessLevel(level: ColVisibility, usrID?: string) {
-            // TODO
-            // This method should not always consult with the database but instead
-            // look at cache
-
+        public async accessLevel(usrID?: string) {
             // Max collection access level is write
             const maxLevelAccess = ColVisibility.WRITE;
             // There are total 3 possible scenarios how the user might have access
@@ -80,7 +78,7 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
                 .first();
             // It so happens that each next levels contains the allowance for previous levels
             // If that is not the case, this should be change
-            return level <= maxVisibility['visibility'];
+            return maxVisibility['visibility'];
         }
     }
     return Collection;

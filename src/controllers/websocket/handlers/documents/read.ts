@@ -20,7 +20,8 @@ const documentRead: HandlerFn = errorHandler(async function (
     const col = await collectionChecked(this, colUUID, ColVisibility.READ);
     const documentForRes = {
         name: docName,
-        text: ''
+        text: '',
+        visibility: await col.accessLevel(this.user.id)
     };
     // Lock is needed to forbid document changes while someone is reading
     // Funny

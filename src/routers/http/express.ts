@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Router } from 'express';
 import session from 'express-session';
 import cors from 'cors';
 import { ZodError } from 'zod';
+import csrf from 'csurf';
 import type { HTTPUserControllerType } from '../../controllers/http/user';
 import ILogger from '../../utils/interface/logger';
 import ResponseHelper, {
@@ -89,7 +90,6 @@ class ExpressAPI {
                 path: '/',
                 ...this.config.session.cookie
             }
-
         }));
         // Setup logger middleware
         this.app.use((req, res, next) => {
@@ -120,10 +120,30 @@ class ExpressAPI {
 
     protected initRoutes() {
         const { HTTPUserController } = this.dependencies.controllers;
+        const csrfProtection = csrf({ cookie: false });
+        // Now why doesn't this route have CSRF protection?
+        // Well it is rather simple, because it does not create a session
+        // Instead it returns a JWT token that is used to connect to the websocket
+        // And since malicious website can't read the token from the response,
+        // (assuming the browser is enforcing the Same Origin Policy)
+        // It can't use it to connect to the websocket
         this.app.post('/auth/login', HTTPUserController.login);
+        this.app.post(
+            '/auth/csrf',
+            csrf({ cookie: false, ignoreMethods: ['POST'] }),
+            (req, res) => {
+                res.status(200).json({ data: { token: req.csrfToken() } });
+            });
+        // Apply CSRF protection to other routes
+        this.app.use(csrfProtection);
+        // Thinking about it, using CSRF protection is a bit overkill
+        // Since /auth/session returns a JWT token
+        // Which can't be read by malicious website
+        // (assuming the browser is enforcing the Same Origin Policy)
         this.app.post('/auth/session', HTTPUserController.session);
+        // Here is a legit use case for CSRF protection
+        // Since I do not want a malicious website to log out the user
         this.app.post('/auth/logout', HTTPUserController.logout);
-
     }
 
     protected initErrorHandlers() {
