@@ -31,8 +31,17 @@ describe('collection read', () => {
         const c1 = new env.WSWebsocketController(ws1, env.users[0]);
 
         const mockCollections = [
-            { uuid: 'uuid1', time: new Date('2023-01-02'), user: '1', name: 'name1' },
-            { uuid: 'uuid2', time: new Date('2023-01-01'), user: '2', name: 'name2' }
+            { uuid: 'uuid1',
+                time: new Date('2023-01-02'),
+                user: '1',
+                name: 'name1',
+                defaultDocument: 'doc1' },
+            { uuid: 'uuid2',
+                time: new Date('2023-01-01'),
+                user: '2',
+                name: 'name2',
+                defaultDocument: 'doc2'
+            }
         ];
         vi.spyOn(c1.user, 'getCollectionList').mockResolvedValue(mockCollections);
 
@@ -79,7 +88,8 @@ describe('collection read', () => {
         const mockCollection = [{ uuid: 'uuid1',
             time: new Date('2023-01-02'),
             user: 'user 1',
-            name: 'name 1'
+            name: 'name 1',
+            defaultDocument: 'doc1'
         }];
         vi.spyOn(c1.user, 'getCollectionList').mockResolvedValue(mockCollection);
 

@@ -62,7 +62,9 @@ export default async function createControllerEnvironment(
     );
     const WSWebsocketController = defineSocketController({
         config: {
-            baseUrl: dependencies.baseUrl
+            baseUrl: dependencies.baseUrl,
+            // TODO customize this
+            trustProxy: false
         },
         models,
         logger: loggerMock,
