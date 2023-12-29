@@ -17,6 +17,7 @@ interface ICollection {
     createDocument(name: string): Promise<IDocument>
     delete(): Promise<void>
     readBy(usrID: string): Promise<void>
+    sharedTo(): Promise<{ name: string, visibility: ColVisibility | undefined }[]>
 }
 interface ICollectionType {
     findOne(properties: {

@@ -9,13 +9,11 @@ import {
     ColVisibility,
     CollectionGatewayType
 } from '../gateways/interface/collection';
-import { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 
 interface Dependencies {
   gateways: {
     User: UserGatewayType;
     Collection: CollectionGatewayType;
-    UserCollection: UserCollectionGatewayType;
   };
   models: {
     Collection: ICollectionType;

@@ -94,7 +94,43 @@ const sqliteTableSetup = [
                 ON DELETE CASCADE,
             UNIQUE(clo_usrID, clo_colID)
         )
+    `,
+
+    // File table is used to store the file under the document
+    // The file is created by the user and there is no certain way to store
+    // So there is an integer key that describes the storage type
+    // And a field that stores the path to the file
+    // Quite sad the file prefix is used, instead of 3 letter prefix
+    // But this makes it easier to read
     `
+        CREATE TABLE IF NOT EXISTS File (
+            fileID INTEGER PRIMARY KEY,
+            fileUUID TEXT NOT NULL UNIQUE,
+            fileStorageType INTEGER NOT NULL,
+            filePath TEXT NULL,
+            fileBlob BLOB NULL,
+            file_docID INTEGER NOT NULL,
+            file_usrID INTEGER NOT NULL,
+            fileCreatedAt TIMESTAMP NOT NULL,
+            FOREIGN KEY (file_docID)
+            REFERENCES Document(docID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE,
+            FOREIGN KEY (file_usrID)
+            REFERENCES User(usrID)
+                ON UPDATE CASCADE
+                ON DELETE CASCADE
+        )
+    `,
+    // Index on file_docID and file_usrID since they will potentially searched by
+    // Potentially remove these if they are not used
+    `
+            CREATE INDEX IF NOT EXISTS idx_file_docID on File(file_docID);
+    `,
+    `
+            CREATE INDEX IF NOT EXISTS idx_file_usrID on File(file_usrID);
+    `
+
 ];
 
 

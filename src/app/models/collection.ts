@@ -187,6 +187,10 @@ export default function defineCollection(dependencies: Dependencies) {
             return new this.dependencies.models.Document(item);
         }
 
+        public async sharedTo() {
+            return this.collection.sharedTo();
+        }
+
     }
     return Collection;
 }

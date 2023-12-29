@@ -1,5 +1,5 @@
-import { JSONArray, JSONValue } from '../../utils/json';
-import { CacheGatewayType, ICacheGateway } from '../gateways/interface/cache';
+import { JSONValue } from '../../utils/json';
+import { CacheGatewayType } from '../gateways/interface/cache';
 import {
     IDocumentGateway,
     DocumentGatewayType

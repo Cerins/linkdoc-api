@@ -80,6 +80,13 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
             // If that is not the case, this should be change
             return maxVisibility['visibility'];
         }
+        public async sharedTo() {
+            const users = await db('UserCollection')
+                .select('usrName as name', 'uclVisibility as visibility')
+                .join('User', 'ucl_usrID', 'usrID')
+                .where('ucl_colID', this.id);
+            return users;
+        }
     }
     return Collection;
 }

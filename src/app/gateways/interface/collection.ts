@@ -18,6 +18,7 @@ interface ICollectionGateway extends IObjectGateway {
         visibility: ColVisibility
         defaultDocument: string | null;
         accessLevel(usrID?: string): Promise<ColVisibility>;
+        sharedTo(): Promise<{ name: string, visibility: ColVisibility | undefined }[]>
 }
 
 interface CollectionGatewayType

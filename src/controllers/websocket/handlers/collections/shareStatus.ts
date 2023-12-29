@@ -27,7 +27,7 @@ const collectionShareInfo: HandlerFn = errorHandler(async function (
     };
     if(owner) {
         answer.visibility = col.visibility;
-        // answer.users = await col.getUsers();
+        answer.users = await col.sharedTo();
     }
     this.emit(outputType(type, 'OK'), answer, acknowledge);
 });
