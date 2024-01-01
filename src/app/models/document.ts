@@ -1,15 +1,15 @@
-import { JSONValue } from '../../utils/json';
+import TextOperation from '../../utils/ot/text-operation';
+import WrappedOperation from '../../utils/ot/wrapped-operation';
+import Selection from '../../utils/ot/selection';
+import Server from '../../utils/ot/server';
 import { CacheGatewayType } from '../gateways/interface/cache';
 import {
     IDocumentGateway,
     DocumentGatewayType
 } from '../gateways/interface/document';
 import {
-    EraseTransform,
     IDocument,
-    Transform,
-    TransformType,
-    WriteTransform
+    Transform
 } from './interface/document';
 
 interface Dependencies {
@@ -60,22 +60,6 @@ export function defineDocumentCache(dependencies: {
     });
 }
 
-export function defineUserCache(dependencies: {
-    gateways: {
-        Cache: CacheGatewayType;
-    }
-}) {
-    const { Cache } = dependencies.gateways;
-    return new Cache({
-        namespace: 'documents:users',
-        timeout: 1000 * 60 * 60,
-        resolver: async (name) => {
-            return {};
-        }
-    });
-}
-
-
 export function defineTransformCache(dependencies: {
   gateways: {
     Document: DocumentGatewayType;
@@ -95,7 +79,6 @@ export function defineTransformCache(dependencies: {
 export default function defineDocument(dependencies: Dependencies) {
     const documentsCache = defineDocumentCache(dependencies);
     const transformsCache = defineTransformCache(dependencies);
-    // const usersCache = defineUserCache(dependencies);
     class Document implements IDocument {
         private document: IDocumentGateway;
 
@@ -124,31 +107,18 @@ export default function defineDocument(dependencies: Dependencies) {
             )) as unknown as Transform[];
             return pastTransforms.length;
         }
-        public async setOperations(operations: any[]) {
+        private async setOperations(operations: any[]) {
             await transformsCache.set(
                 `${this.document.collectionID}:${this.document.name}`, operations
             );
         }
-        public async getOperations() {
+        private async getOperations() {
             const pastTransforms = (await transformsCache.get(
                 `${this.document.collectionID}:${this.document.name}`
             )) as any[];
             return pastTransforms;
         }
-        public async sid() {
-            const pastTransforms = (await transformsCache.get(
-                `${this.document.collectionID}:${this.document.name}`
-            )) as unknown as Transform[];
-            if (pastTransforms.length === 0) {
-                return 1;
-            }
-            // Find max sid
-            const max = pastTransforms.reduce((a, b) => {
-                return a.payload.sid > b.payload.sid ? a : b;
-            });
-            return max.payload.sid + 1;
-        }
-        public async setText(txt: string) {
+        private async setText(txt: string) {
             this.document.text = txt;
             const saveDoc = async () => {
                 const {
@@ -166,103 +136,45 @@ export default function defineDocument(dependencies: Dependencies) {
             };
             await saveDoc();
         }
-        protected async ot(transform: Transform) {
-            const { collectionID, name } = this.document;
-            let pastTransforms
-                        =  (await transformsCache
-                            .get(
-                                `${collectionID}:${name}`
-                            )) as unknown as Transform[];
-
-
-            // Currently only support these types
-            if (transform.type === TransformType.WRITE || transform.type === TransformType.ERASE) {
-                pastTransforms.forEach((other) => {
-                    // Skip processing for transforms that happened after the transform
-                    // TODO = is here to make sure that old tests do not break,
-                    // but it might be better behavior if this is removed
-                    // this needs to be experimented with
-                    if (other.payload.sid <= transform.payload.sid) {
-                        return;
-                    }
-                    if(
-                        other.type === TransformType.WRITE
-                        && other.payload.index <= transform.payload.index
-                        && other.payload.sid >= transform.payload.sid
-                    ) {
-                        transform.payload.index += other.payload.text.length;
-                    }
-                    if(
-                        other.type === TransformType.ERASE
-                        && other.payload.index < transform.payload.index
-                        && other.payload.sid >= transform.payload.sid
-                    ) {
-                        transform.payload.index -= other.payload.count;
-                    }
-
-
-                });
-            }
-
-            pastTransforms.push(transform);
-            // Only needed to discard old items
-            pastTransforms.sort((a, b) => a.payload.sid - b.payload.sid ? 1 : -1);
-            pastTransforms = pastTransforms.slice(0, 101);
-            await transformsCache.set(
-                `${collectionID}:${name}`, pastTransforms as unknown as JSONValue
+        public async transformRaw(
+            operation: unknown[],
+            selection: {
+                ranges: {
+                    anchor: number;
+                    head: number;
+                }[]
+            } | null,
+            revision: number
+        ) {
+            // TODO Potential redis usage problems
+            // Look here if it a problem
+            const past = (await this.getOperations()).map(
+                (op)=>{
+                    return new WrappedOperation(
+                        TextOperation.fromJSON(op.operation),
+                        op.meta && Selection.fromJSON(op.meta)
+                    );
+                }
             );
-            return transform;
-        }
-        public async transform(transformRaw: Transform) {
-            const saveDoc = async () => {
-                const {
-                    collectionID,
-                    id,
-                    name,
-                    text
-                } = this.document;
-                await documentsCache.set(`${collectionID}:${name}`, {
-                    id,
-                    collectionID,
-                    name,
-                    text
-                });
-            };
-            const writeTxt = async(transform: WriteTransform)=>{
-                const { index, text } = transform.payload;
-                const s = 0;
-                const l = index;
-                const r = index;
-                const e = this.document.text.length;
-                const newTxt = this.document.text.slice(s, l)
-                                + text
-                                + this.document.text.slice(r, e);
-                this.document.text = newTxt;
-                await saveDoc();
-            };
-            const deleteTxt = async(transform: EraseTransform)=>{
-                const { index, count }  = transform.payload;
-                const s = 0;
-                const l = index;
-                const r = l + count;
-                const e = this.document.text.length;
-                const newTxt = this.document.text.slice(s, l) + this.document.text.slice(r, e);
-                this.document.text = newTxt;
-                await saveDoc();
-            };
-            const transform = await this.ot(transformRaw);
-            switch(transform.type){
-            case TransformType.WRITE:
-                await writeTxt(transform);
-                break;
-            case TransformType.ERASE:
-                await deleteTxt(transform);
-                break;
-            default:
-                throw new Error('Unknown transform');
-            }
+            const server = new Server(this.text, past);
 
-            return transform;
+            const wrapped = new WrappedOperation(
+                TextOperation.fromJSON(operation),
+                selection && Selection.fromJSON(selection)
+            );
+            const wrappedPrime = server.receiveOperation(revision, wrapped);
+            await this.setText(server.document);
+            // Redis And here also
+            await this.setOperations(server.operations.map((wo: any)=>{
+                return {
+                    operation: wo.wrapped.toJSON(),
+                    meta: wo.meta
+                };
+            }));
+            return {
+                operation: wrappedPrime.wrapped.toJSON(),
+                meta: wrappedPrime.meta
+            };
         }
     }
     return Document;

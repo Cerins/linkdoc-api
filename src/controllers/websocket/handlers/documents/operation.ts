@@ -51,43 +51,22 @@ const documentOperation:HandlerFn = errorHandler(async function(
         if(doc === undefined) {
             doc = await col.createDocument(docName);
         }
-        // TODO Potential redis usage problems
-        // Look here if it a problem
-        const past = (await doc.getOperations()).map(
-            (op)=>{
-                return new WrappedOperation(
-                    TextOperation.fromJSON(op.operation),
-                    op.meta && Selection.fromJSON(op.meta)
-                );
-            }
-        );
-        const server = new Server(doc.text, past);
-
         const clientID = this.sessionID;
-        const wrapped = new WrappedOperation(
-            TextOperation.fromJSON(operation),
-            selection && Selection.fromJSON(selection)
+        const wrappedPrime = await doc.transformRaw(
+            operation,
+            selection,
+            revision
         );
-        const wrappedPrime = server.receiveOperation(revision, wrapped);
         this.emit(
             'DOC.ACK',
             {}
         );
-        await doc.setText(server.document);
-        // Redis And here also
-        await doc.setOperations(server.operations.map((wo: any)=>{
-            return {
-                operation: wo.wrapped.toJSON(),
-                meta: wo.meta
-            };
-        }));
         this.broadcastRoom(
             docRoom(colUUID, docName),
             'DOC.OPERATION.OK',
             {
                 clientID,
-                operation: wrappedPrime.wrapped.toJSON(),
-                meta: wrappedPrime.meta
+                ...wrappedPrime
             }
         );
     } finally {

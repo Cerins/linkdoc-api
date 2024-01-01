@@ -48,14 +48,8 @@ describe('Document read', () => {
         });
         col = await env.users[0].createCollection(colInfo[0].name);
         doc = await col.createDocument(docInfo[0].name);
-        await doc.transform({
-            type: TransformType.WRITE,
-            payload: {
-                sid: 0,
-                index: 0,
-                text: docInfo[0].text
-            }
-        });
+        // Access private setText, which is easier than transforming
+        await ((doc as any).setText(docInfo[0].text));
     });
     test('Document read', async () => {
         const ws1 = createWebSocketMock();

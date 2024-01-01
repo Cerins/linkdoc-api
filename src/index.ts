@@ -10,8 +10,6 @@ import STDWriter from './utils/writer/std';
 import config from './config';
 import collectionDelete from './controllers/websocket/handlers/collections/delete';
 import collectionShare from './controllers/websocket/handlers/collections/share';
-import documentErase from './controllers/websocket/handlers/documents/erase';
-import documentWrite from './controllers/websocket/handlers/documents/write';
 import documentRead from './controllers/websocket/handlers/documents/read';
 import collectionRead from './controllers/websocket/handlers/collections/read';
 import collectionShareInfo from './controllers/websocket/handlers/collections/shareStatus';
@@ -57,8 +55,6 @@ async function main() {
             .registerHandler('DOC.READ', documentRead)
             .registerHandler('DOC.SELECTION', documentSelection)
             .registerHandler('DOC.OPERATION', documentOperation)
-            // .registerHandler('DOC.WRITE', documentWrite)
-            // .registerHandler('DOC.ERASE', documentErase)
 
     };
     const consoleController = new ConsoleController({

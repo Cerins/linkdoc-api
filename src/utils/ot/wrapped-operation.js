@@ -1,3 +1,4 @@
+/* v8 ignore start */
 // A WrappedOperation contains an operation and corresponing metadata.
 function WrappedOperation (operation, meta) {
     this.wrapped = operation;
@@ -9,17 +10,17 @@ WrappedOperation.prototype.apply = function () {
 };
 
 WrappedOperation.prototype.invert = function () {
-    var meta = this.meta;
+    const { meta } = this;
     return new WrappedOperation(
         this.wrapped.invert.apply(this.wrapped, arguments),
-        meta && typeof meta === 'object' && typeof meta.invert === 'function' ?
-            meta.invert.apply(meta, arguments) : meta
+        meta && typeof meta === 'object' && typeof meta.invert === 'function'
+            ? meta.invert.apply(meta, arguments) : meta
     );
 };
 
 // Copy all properties from source to target.
 function copy (source, target) {
-    for (var key in source) {
+    for (const key in source) {
         if (source.hasOwnProperty(key)) {
             target[key] = source[key];
         }
@@ -29,7 +30,7 @@ function copy (source, target) {
 function composeMeta (a, b) {
     if (a && typeof a === 'object') {
         if (typeof a.compose === 'function') { return a.compose(b); }
-        var meta = {};
+        const meta = {};
         copy(a, meta);
         copy(b, meta);
         return meta;
@@ -54,12 +55,13 @@ function transformMeta (meta, operation) {
 }
 
 WrappedOperation.transform = function (a, b) {
-    var transform = a.wrapped.constructor.transform;
-    var pair = transform(a.wrapped, b.wrapped);
+    const { transform } = a.wrapped.constructor;
+    const pair = transform(a.wrapped, b.wrapped);
     return [
         new WrappedOperation(pair[0], transformMeta(a.meta, b.wrapped)),
         new WrappedOperation(pair[1], transformMeta(b.meta, a.wrapped))
     ];
 };
 
-export default WrappedOperation
+export default WrappedOperation;
+/* v8 ignore stop */

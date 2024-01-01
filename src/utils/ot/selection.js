@@ -1,4 +1,5 @@
-import TextOperation from "./text-operation";
+/* v8 ignore start */
+import TextOperation from './text-operation';
 
 // Range has `anchor` and `head` properties, which are zero-based indices into
 // the document. The `anchor` is the side of the selection that stays fixed,
@@ -23,9 +24,9 @@ Range.prototype.isEmpty = function () {
 
 Range.prototype.transform = function (other) {
     function transformIndex (index) {
-        var newIndex = index;
-        var ops = other.ops;
-        for (var i = 0, l = other.ops.length; i < l; i++) {
+        let newIndex = index;
+        const { ops } = other;
+        for (let i = 0, l = other.ops.length; i < l; i++) {
             if (TextOperation.isRetain(ops[i])) {
                 index -= ops[i];
             } else if (TextOperation.isInsert(ops[i])) {
@@ -39,7 +40,7 @@ Range.prototype.transform = function (other) {
         return newIndex;
     }
 
-    var newAnchor = transformIndex(this.anchor);
+    const newAnchor = transformIndex(this.anchor);
     if (this.anchor === this.head) {
         return new Range(newAnchor, newAnchor);
     }
@@ -62,7 +63,7 @@ Selection.createCursor = function (position) {
 };
 
 Selection.fromJSON = function (obj) {
-    var objRanges = obj.ranges || obj;
+    const objRanges = obj.ranges || obj;
     for (var i = 0, ranges = []; i < objRanges.length; i++) {
         ranges[i] = Range.fromJSON(objRanges[i]);
     }
@@ -73,14 +74,14 @@ Selection.prototype.equals = function (other) {
     if (this.position !== other.position) { return false; }
     if (this.ranges.length !== other.ranges.length) { return false; }
     // FIXME: Sort ranges before comparing them?
-    for (var i = 0; i < this.ranges.length; i++) {
+    for (let i = 0; i < this.ranges.length; i++) {
         if (!this.ranges[i].equals(other.ranges[i])) { return false; }
     }
     return true;
 };
 
 Selection.prototype.somethingSelected = function () {
-    for (var i = 0; i < this.ranges.length; i++) {
+    for (let i = 0; i < this.ranges.length; i++) {
         if (!this.ranges[i].isEmpty()) { return true; }
     }
     return false;
@@ -100,5 +101,5 @@ Selection.prototype.transform = function (other) {
 };
 
 
-
 export default Selection;
+/* v8 ignore stop */

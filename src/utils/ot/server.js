@@ -1,4 +1,4 @@
-
+/* v8 ignore start */
 // Constructor. Takes the current document as a string and optionally the array
 // of all operations.
 function Server (document, operations) {
@@ -10,15 +10,15 @@ function Server (document, operations) {
 Server.prototype.receiveOperation = function (revision, operation) {
     // TODO RC: this will have to be revised in the future, since operations will be sliced and diced
     if (revision < 0 || this.operations.length < revision) {
-        throw new Error("operation revision not in history");
+        throw new Error('operation revision not in history');
     }
     // Find all operations that the client didn't know of when it sent the
     // operation ...
-    var concurrentOperations = this.operations.slice(revision);
+    const concurrentOperations = this.operations.slice(revision);
 
     // ... and transform the operation against all these operations ...
-    var transform = operation.constructor.transform;
-    for (var i = 0; i < concurrentOperations.length; i++) {
+    const { transform } = operation.constructor;
+    for (let i = 0; i < concurrentOperations.length; i++) {
         operation = transform(operation, concurrentOperations[i])[0];
     }
 
@@ -32,4 +32,5 @@ Server.prototype.receiveOperation = function (revision, operation) {
     return operation;
 };
 
-export default Server
+export default Server;
+/* v8 ignore stop */

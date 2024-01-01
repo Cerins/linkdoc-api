@@ -1,3 +1,4 @@
+/* v8 ignore start */
 // Constructor for new operations.
 function TextOperation () {
     if (!this || this.constructor !== TextOperation) {
@@ -22,7 +23,7 @@ TextOperation.prototype.equals = function (other) {
     if (this.baseLength !== other.baseLength) { return false; }
     if (this.targetLength !== other.targetLength) { return false; }
     if (this.ops.length !== other.ops.length) { return false; }
-    for (var i = 0; i < this.ops.length; i++) {
+    for (let i = 0; i < this.ops.length; i++) {
         if (this.ops[i] !== other.ops[i]) { return false; }
     }
     return true;
@@ -36,15 +37,15 @@ TextOperation.prototype.equals = function (other) {
 //   Represented by strings.
 // * Delete ops: Delete the next n characters. Represented by negative ints.
 
-var isRetain = TextOperation.isRetain = function (op) {
+const isRetain = TextOperation.isRetain = function (op) {
     return typeof op === 'number' && op > 0;
 };
 
-var isInsert = TextOperation.isInsert = function (op) {
+const isInsert = TextOperation.isInsert = function (op) {
     return typeof op === 'string';
 };
 
-var isDelete = TextOperation.isDelete = function (op) {
+const isDelete = TextOperation.isDelete = function (op) {
     return typeof op === 'number' && op < 0;
 };
 
@@ -56,7 +57,7 @@ var isDelete = TextOperation.isDelete = function (op) {
 // Skip over a given number of characters.
 TextOperation.prototype.retain = function (n) {
     if (typeof n !== 'number') {
-        throw new Error("retain expects an integer");
+        throw new Error('retain expects an integer');
     }
     if (n === 0) { return this; }
     this.baseLength += n;
@@ -74,11 +75,11 @@ TextOperation.prototype.retain = function (n) {
 // Insert a string at the current position.
 TextOperation.prototype.insert = function (str) {
     if (typeof str !== 'string') {
-        throw new Error("insert expects a string");
+        throw new Error('insert expects a string');
     }
     if (str === '') { return this; }
     this.targetLength += str.length;
-    var ops = this.ops;
+    const { ops } = this;
     if (isInsert(ops[ops.length-1])) {
         // Merge insert op.
         ops[ops.length-1] += str;
@@ -104,7 +105,7 @@ TextOperation.prototype.insert = function (str) {
 TextOperation.prototype['delete'] = function (n) {
     if (typeof n === 'string') { n = n.length; }
     if (typeof n !== 'number') {
-        throw new Error("delete expects an integer or a string");
+        throw new Error('delete expects an integer or a string');
     }
     if (n === 0) { return this; }
     if (n > 0) { n = -n; }
@@ -126,21 +127,21 @@ TextOperation.prototype.isNoop = function () {
 TextOperation.prototype.toString = function () {
     // map: build a new array by applying a function to every element in an old
     // array.
-    var map = Array.prototype.map || function (fn) {
-        var arr = this;
-        var newArr = [];
-        for (var i = 0, l = arr.length; i < l; i++) {
+    const map = Array.prototype.map || function (fn) {
+        const arr = this;
+        const newArr = [];
+        for (let i = 0, l = arr.length; i < l; i++) {
             newArr[i] = fn(arr[i]);
         }
         return newArr;
     };
     return map.call(this.ops, function (op) {
         if (isRetain(op)) {
-            return "retain " + op;
+            return `retain ${  op}`;
         } else if (isInsert(op)) {
-            return "insert '" + op + "'";
+            return `insert '${  op  }'`;
         } else {
-            return "delete " + (-op);
+            return `delete ${  -op}`;
         }
     }).join(', ');
 };
@@ -152,9 +153,9 @@ TextOperation.prototype.toJSON = function () {
 
 // Converts a plain JS object into an operation and validates it.
 TextOperation.fromJSON = function (ops) {
-    var o = new TextOperation();
-    for (var i = 0, l = ops.length; i < l; i++) {
-        var op = ops[i];
+    const o = new TextOperation();
+    for (let i = 0, l = ops.length; i < l; i++) {
+        const op = ops[i];
         if (isRetain(op)) {
             o.retain(op);
         } else if (isInsert(op)) {
@@ -162,7 +163,7 @@ TextOperation.fromJSON = function (ops) {
         } else if (isDelete(op)) {
             o['delete'](op);
         } else {
-            throw new Error("unknown operation: " + JSON.stringify(op));
+            throw new Error(`unknown operation: ${  JSON.stringify(op)}`);
         }
     }
     return o;
@@ -171,18 +172,18 @@ TextOperation.fromJSON = function (ops) {
 // Apply an operation to a string, returning a new string. Throws an error if
 // there's a mismatch between the input string and the operation.
 TextOperation.prototype.apply = function (str) {
-    var operation = this;
+    const operation = this;
     if (str.length !== operation.baseLength) {
-        throw new Error("The operation's base length must be equal to the string's length.");
+        throw new Error('The operation\'s base length must be equal to the string\'s length.');
     }
-    var newStr = [], j = 0;
-    var strIndex = 0;
-    var ops = this.ops;
-    for (var i = 0, l = ops.length; i < l; i++) {
-        var op = ops[i];
+    let newStr = [], j = 0;
+    let strIndex = 0;
+    const { ops } = this;
+    for (let i = 0, l = ops.length; i < l; i++) {
+        const op = ops[i];
         if (isRetain(op)) {
             if (strIndex + op > str.length) {
-                throw new Error("Operation can't retain more characters than are left in the string.");
+                throw new Error('Operation can\'t retain more characters than are left in the string.');
             }
             // Copy skipped part of the old string.
             newStr[j++] = str.slice(strIndex, strIndex + op);
@@ -195,7 +196,7 @@ TextOperation.prototype.apply = function (str) {
         }
     }
     if (strIndex !== str.length) {
-        throw new Error("The operation didn't operate on the whole string.");
+        throw new Error('The operation didn\'t operate on the whole string.');
     }
     return newStr.join('');
 };
@@ -205,11 +206,11 @@ TextOperation.prototype.apply = function (str) {
 // operation 'insert("hello "); skip(6);' then the inverse is 'delete("hello ");
 // skip(6);'. The inverse should be used for implementing undo.
 TextOperation.prototype.invert = function (str) {
-    var strIndex = 0;
-    var inverse = new TextOperation();
-    var ops = this.ops;
-    for (var i = 0, l = ops.length; i < l; i++) {
-        var op = ops[i];
+    let strIndex = 0;
+    const inverse = new TextOperation();
+    const { ops } = this;
+    for (let i = 0, l = ops.length; i < l; i++) {
+        const op = ops[i];
         if (isRetain(op)) {
             inverse.retain(op);
             strIndex += op;
@@ -228,15 +229,15 @@ TextOperation.prototype.invert = function (str) {
 // and a pair of consecutive operations A and B,
 // apply(apply(S, A), B) = apply(S, compose(A, B)) must hold.
 TextOperation.prototype.compose = function (operation2) {
-    var operation1 = this;
+    const operation1 = this;
     if (operation1.targetLength !== operation2.baseLength) {
-        throw new Error("The base length of the second operation has to be the target length of the first operation");
+        throw new Error('The base length of the second operation has to be the target length of the first operation');
     }
 
-    var operation = new TextOperation(); // the combined operation
-    var ops1 = operation1.ops, ops2 = operation2.ops; // for fast access
-    var i1 = 0, i2 = 0; // current index into ops1 respectively ops2
-    var op1 = ops1[i1++], op2 = ops2[i2++]; // current ops
+    const operation = new TextOperation(); // the combined operation
+    const ops1 = operation1.ops, ops2 = operation2.ops; // for fast access
+    let i1 = 0, i2 = 0; // current index into ops1 respectively ops2
+    let op1 = ops1[i1++], op2 = ops2[i2++]; // current ops
     while (true) {
         // Dispatch on the type of op1 and op2
         if (typeof op1 === 'undefined' && typeof op2 === 'undefined') {
@@ -256,10 +257,10 @@ TextOperation.prototype.compose = function (operation2) {
         }
 
         if (typeof op1 === 'undefined') {
-            throw new Error("Cannot compose operations: first operation is too short.");
+            throw new Error('Cannot compose operations: first operation is too short.');
         }
         if (typeof op2 === 'undefined') {
-            throw new Error("Cannot compose operations: first operation is too long.");
+            throw new Error('Cannot compose operations: first operation is too long.');
         }
 
         if (isRetain(op1) && isRetain(op2)) {
@@ -317,9 +318,9 @@ TextOperation.prototype.compose = function (operation2) {
             }
         } else {
             throw new Error(
-                "This shouldn't happen: op1: " +
-          JSON.stringify(op1) + ", op2: " +
-          JSON.stringify(op2)
+                `This shouldn't happen: op1: ${
+                    JSON.stringify(op1)  }, op2: ${
+                    JSON.stringify(op2)}`
             );
         }
     }
@@ -327,8 +328,8 @@ TextOperation.prototype.compose = function (operation2) {
 };
 
 function getSimpleOp (operation, fn) {
-    var ops = operation.ops;
-    var isRetain = TextOperation.isRetain;
+    const { ops } = operation;
+    const { isRetain } = TextOperation;
     switch (ops.length) {
     case 1:
         return ops[0];
@@ -356,8 +357,8 @@ function getStartIndex (operation) {
 TextOperation.prototype.shouldBeComposedWith = function (other) {
     if (this.isNoop() || other.isNoop()) { return true; }
 
-    var startA = getStartIndex(this), startB = getStartIndex(other);
-    var simpleA = getSimpleOp(this), simpleB = getSimpleOp(other);
+    const startA = getStartIndex(this), startB = getStartIndex(other);
+    const simpleA = getSimpleOp(this), simpleB = getSimpleOp(other);
     if (!simpleA || !simpleB) { return false; }
 
     if (isInsert(simpleA) && isInsert(simpleB)) {
@@ -379,8 +380,8 @@ TextOperation.prototype.shouldBeComposedWith = function (other) {
 TextOperation.prototype.shouldBeComposedWithInverted = function (other) {
     if (this.isNoop() || other.isNoop()) { return true; }
 
-    var startA = getStartIndex(this), startB = getStartIndex(other);
-    var simpleA = getSimpleOp(this), simpleB = getSimpleOp(other);
+    const startA = getStartIndex(this), startB = getStartIndex(other);
+    const simpleA = getSimpleOp(this), simpleB = getSimpleOp(other);
     if (!simpleA || !simpleB) { return false; }
 
     if (isInsert(simpleA) && isInsert(simpleB)) {
@@ -400,14 +401,14 @@ TextOperation.prototype.shouldBeComposedWithInverted = function (other) {
 // heart of OT.
 TextOperation.transform = function (operation1, operation2) {
     if (operation1.baseLength !== operation2.baseLength) {
-        throw new Error("Both operations have to have the same base length");
+        throw new Error('Both operations have to have the same base length');
     }
 
-    var operation1prime = new TextOperation();
-    var operation2prime = new TextOperation();
-    var ops1 = operation1.ops, ops2 = operation2.ops;
-    var i1 = 0, i2 = 0;
-    var op1 = ops1[i1++], op2 = ops2[i2++];
+    const operation1prime = new TextOperation();
+    const operation2prime = new TextOperation();
+    const ops1 = operation1.ops, ops2 = operation2.ops;
+    let i1 = 0, i2 = 0;
+    let op1 = ops1[i1++], op2 = ops2[i2++];
     while (true) {
         // At every iteration of the loop, the imaginary cursor that both
         // operation1 and operation2 have that operates on the input string must
@@ -435,10 +436,10 @@ TextOperation.transform = function (operation1, operation2) {
         }
 
         if (typeof op1 === 'undefined') {
-            throw new Error("Cannot compose operations: first operation is too short.");
+            throw new Error('Cannot compose operations: first operation is too short.');
         }
         if (typeof op2 === 'undefined') {
-            throw new Error("Cannot compose operations: first operation is too long.");
+            throw new Error('Cannot compose operations: first operation is too long.');
         }
 
         var minl;
@@ -505,7 +506,7 @@ TextOperation.transform = function (operation1, operation2) {
             }
             operation2prime['delete'](minl);
         } else {
-            throw new Error("The two operations aren't compatible");
+            throw new Error('The two operations aren\'t compatible');
         }
     }
 
@@ -513,4 +514,5 @@ TextOperation.transform = function (operation1, operation2) {
 };
 
 
-export default TextOperation
+export default TextOperation;
+/* v8 ignore stop */

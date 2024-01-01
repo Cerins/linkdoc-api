@@ -31,12 +31,17 @@ interface IDocument {
     name: string;
     text: string;
     collectionID: string;
-    transform: (transform:Transform) => Promise<Transform>
-    // sid: ()=>Promise<number>
-    revision: ()=>Promise<number>
-    setOperations: (operations: any[])=>Promise<void>
-    getOperations: ()=>Promise<any[]>
-    setText: (text: string)=>Promise<void>
+    revision(): Promise<number>;
+    transformRaw(
+        operation: unknown[],
+        selection: {
+            ranges: {
+                anchor: number;
+                head: number;
+            }[]
+        } | null,
+        revision: number
+    ): Promise<any>
 }
 
 interface IDocumentType {
