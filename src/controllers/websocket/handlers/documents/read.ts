@@ -25,7 +25,7 @@ const documentRead: HandlerFn = errorHandler(async function (
     };
     // Lock is needed to forbid document changes while someone is reading
     // Funny
-    const lock = await this.gateways.Lock.lock(`documents:${docName}`);
+    const lock = await this.gateways.Lock.lock(`documents:${colUUID}:${docName}`);
     try{
         const doc = await col.findDocument(docName);
         if(doc !== undefined) {
@@ -35,7 +35,10 @@ const documentRead: HandlerFn = errorHandler(async function (
         this.join(docRoom(colUUID, docName));
         this.emit(
             outputType(type, 'OK'),
-            documentForRes,
+            {
+                ...documentForRes,
+                sid: doc === undefined ? 0 : await doc.revision()
+            },
             acknowledge
         );
     } finally {

@@ -41,6 +41,7 @@ const documentErase: HandlerFn = errorHandler(async function (
                 colUUID,
                 docName,
                 transform
+                // sid: await doc.sid()
             },
             acknowledge
         );

@@ -63,7 +63,7 @@ describe('Document', () => {
                     payload: {
                         index: 0,
                         text: '123',
-                        sid: 0
+                        sid: 1
                     }
                 });
                 expect(document.text).toBe('123abc');
@@ -82,7 +82,7 @@ describe('Document', () => {
                     payload: {
                         index: 3,
                         text: '123',
-                        sid: 0
+                        sid: 1
                     }
                 });
                 expect(document.text).toBe('abc123');
@@ -101,7 +101,7 @@ describe('Document', () => {
                     payload: {
                         index: 1,
                         text: '123',
-                        sid: 0
+                        sid: 1
                     }
                 });
                 expect(document.text).toBe('a123bc');
@@ -124,7 +124,7 @@ describe('Document', () => {
                     payload: {
                         index: 0,
                         count: 5,
-                        sid: 0
+                        sid: 1
                     }
                 });
                 expect(document.text).toBe('56789');
@@ -135,7 +135,7 @@ describe('Document', () => {
                     payload: {
                         index: 8,
                         count: 2,
-                        sid: 0
+                        sid: 1
                     }
                 });
                 expect(document.text).toBe('01234567');
@@ -146,7 +146,7 @@ describe('Document', () => {
                     payload: {
                         index: 1,
                         count: 3,
-                        sid: 0
+                        sid: 1
                     }
                 });
                 expect(document.text).toBe('0456789');

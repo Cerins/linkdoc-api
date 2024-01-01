@@ -70,7 +70,7 @@ describe('Document write', () => {
         const prefix = '123';
         const payload = {
             index: 0,
-            sid: 0,
+            sid: 2,
             text: prefix
         };
         c1.join(docRoom(col.uuid, doc.name));
@@ -109,7 +109,7 @@ describe('Document write', () => {
         const prefix = '123';
         const payload = {
             index: 0,
-            sid: 0,
+            sid: 5,
             text: prefix
         };
         // c1.join(docRoom(col.uuid, doc.name));

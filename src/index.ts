@@ -15,6 +15,8 @@ import documentWrite from './controllers/websocket/handlers/documents/write';
 import documentRead from './controllers/websocket/handlers/documents/read';
 import collectionRead from './controllers/websocket/handlers/collections/read';
 import collectionShareInfo from './controllers/websocket/handlers/collections/shareStatus';
+import documentSelection from './controllers/websocket/handlers/documents/selection';
+import documentOperation from './controllers/websocket/handlers/documents/operation';
 
 
 async function main() {
@@ -53,8 +55,11 @@ async function main() {
             .registerHandler('COL.SHARE', collectionShare)
             .registerHandler('COL.SHARE.INFO', collectionShareInfo)
             .registerHandler('DOC.READ', documentRead)
-            .registerHandler('DOC.WRITE', documentWrite)
-            .registerHandler('DOC.ERASE', documentErase)
+            .registerHandler('DOC.SELECTION', documentSelection)
+            .registerHandler('DOC.OPERATION', documentOperation)
+            // .registerHandler('DOC.WRITE', documentWrite)
+            // .registerHandler('DOC.ERASE', documentErase)
+
     };
     const consoleController = new ConsoleController({
         logger,

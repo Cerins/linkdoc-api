@@ -69,7 +69,7 @@ describe('Document erase', () => {
         const ack = 'abcd';
         const payload = {
             index: 0,
-            sid: 0,
+            sid: 1,
             count: 1
         };
         c1.join(docRoom(col.uuid, doc.name));
@@ -107,7 +107,7 @@ describe('Document erase', () => {
         const ack = 'abcd';
         const payload = {
             index: 0,
-            sid: 0,
+            sid: 1,
             count: 1
         };
         // c1.join(docRoom(col.uuid, doc.name));

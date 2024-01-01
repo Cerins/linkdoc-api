@@ -30,7 +30,7 @@ export function defineDocumentCache(dependencies: {
     const { Cache, Document } = dependencies.gateways;
     return new Cache({
         namespace: 'documents',
-        timeout: 10000,
+        timeout: 1000 * 60,
         resolver: async (name) => {
             const split = name.split(':');
             const collectionID = split[0];
@@ -60,6 +60,22 @@ export function defineDocumentCache(dependencies: {
     });
 }
 
+export function defineUserCache(dependencies: {
+    gateways: {
+        Cache: CacheGatewayType;
+    }
+}) {
+    const { Cache } = dependencies.gateways;
+    return new Cache({
+        namespace: 'documents:users',
+        timeout: 1000 * 60 * 60,
+        resolver: async (name) => {
+            return {};
+        }
+    });
+}
+
+
 export function defineTransformCache(dependencies: {
   gateways: {
     Document: DocumentGatewayType;
@@ -69,7 +85,7 @@ export function defineTransformCache(dependencies: {
     const { Cache } = dependencies.gateways;
     return new Cache({
         namespace: 'documents:transforms',
-        timeout: 10000,
+        timeout: 1000 * 60 * 60,
         resolver: async (name) => {
             return [];
         }
@@ -79,6 +95,7 @@ export function defineTransformCache(dependencies: {
 export default function defineDocument(dependencies: Dependencies) {
     const documentsCache = defineDocumentCache(dependencies);
     const transformsCache = defineTransformCache(dependencies);
+    // const usersCache = defineUserCache(dependencies);
     class Document implements IDocument {
         private document: IDocumentGateway;
 
@@ -100,6 +117,54 @@ export default function defineDocument(dependencies: Dependencies) {
 
         public get collectionID() {
             return this.document.collectionID;
+        }
+        public async revision() {
+            const pastTransforms = (await transformsCache.get(
+                `${this.document.collectionID}:${this.document.name}`
+            )) as unknown as Transform[];
+            return pastTransforms.length;
+        }
+        public async setOperations(operations: any[]) {
+            await transformsCache.set(
+                `${this.document.collectionID}:${this.document.name}`, operations
+            );
+        }
+        public async getOperations() {
+            const pastTransforms = (await transformsCache.get(
+                `${this.document.collectionID}:${this.document.name}`
+            )) as any[];
+            return pastTransforms;
+        }
+        public async sid() {
+            const pastTransforms = (await transformsCache.get(
+                `${this.document.collectionID}:${this.document.name}`
+            )) as unknown as Transform[];
+            if (pastTransforms.length === 0) {
+                return 1;
+            }
+            // Find max sid
+            const max = pastTransforms.reduce((a, b) => {
+                return a.payload.sid > b.payload.sid ? a : b;
+            });
+            return max.payload.sid + 1;
+        }
+        public async setText(txt: string) {
+            this.document.text = txt;
+            const saveDoc = async () => {
+                const {
+                    collectionID,
+                    id,
+                    name,
+                    text
+                } = this.document;
+                await documentsCache.set(`${collectionID}:${name}`, {
+                    id,
+                    collectionID,
+                    name,
+                    text
+                });
+            };
+            await saveDoc();
         }
         protected async ot(transform: Transform) {
             const { collectionID, name } = this.document;
