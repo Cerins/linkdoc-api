@@ -31,7 +31,7 @@ interface IDocument {
     name: string;
     text: string;
     collectionID: string;
-    // transform: (transform:Transform) => Promise<Transform>
+    transform: (transform:Transform) => Promise<Transform>
     // sid: ()=>Promise<number>
     revision: ()=>Promise<number>
     setOperations: (operations: any[])=>Promise<void>
