@@ -1,59 +1,47 @@
-import { ISocketController } from '..';
-import { ColVisibility } from '../../../app/gateways/interface/collection';
 import RequestError from './error/request';
+import collectionCheckedInner from '../../utils/findCollection';
+
+// Use the same args as in the original function
+type Args = Parameters<typeof collectionCheckedInner>;
 
 export default async function collectionChecked(
-    session: ISocketController,
-    uuid: string,
-    accessLevel: ColVisibility | null,
-    creator?: boolean
+    ...args: Args
 ) {
-    const col = await session.models.Collection.findOne({
-        uuid
-    });
-    if (col === undefined) {
-        throw new RequestError({
-            type: 'NOT_FOUND',
-            payload: {
-                errors: [
-                    {
-                        code: 'COL_NOT_FOUND',
-                        message: 'collection not found'
+    const [session, uuid, accessLevel, creator] = args;
+    try{
+        return (await collectionCheckedInner(session, uuid, accessLevel, creator));
+    } catch(err) {
+        if(err instanceof Error) {
+            if(err.message === 'NOT_FOUND') {
+                throw new RequestError({
+                    type: 'NOT_FOUND',
+                    payload: {
+                        errors: [
+                            {
+                                code: 'COL_NOT_FOUND',
+                                message: 'collection not found'
+                            }
+                        ]
                     }
-                ]
+                });
             }
-        });
-    }
-    const forbiddenError = new RequestError({
-        type: 'FORBIDDEN',
-        payload: {
-            errors: [
-                {
-                    code: 'FORBIDDEN',
-                    message: 'no access'
-                }
-            ]
-        },
-        log: {
-            reason: 'no access to collection'
+            if(err.message === 'FORBIDDEN') {
+                throw new RequestError({
+                    type: 'FORBIDDEN',
+                    payload: {
+                        errors: [
+                            {
+                                code: 'FORBIDDEN',
+                                message: 'no access'
+                            }
+                        ]
+                    },
+                    log: {
+                        reason: 'no access to collection'
+                    }
+                });
+            }
         }
-    });
-    if (accessLevel !== null) {
-        const hasAccess = await col.hasAccessLevel(accessLevel, session.user.id);
-        if (!hasAccess) {
-            throw forbiddenError;
-        }
+        throw err;
     }
-    if (creator && session.user.id !== col.userID) {
-        throw forbiddenError;
-    }
-    // Do not block the response handler because of metadata setting
-    // The metadata collection does not affect the response so should not be
-    // waited for in the event thread
-    col.readBy(session.user.id).catch((err) => {
-        session.logger.log('error', 'readBy error', {
-            error: err
-        });
-    });
-    return col;
 }

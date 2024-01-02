@@ -6,6 +6,12 @@ export = {
                 User: {
                     // How many rounds of salt to use when hashing passwords
                     saltRounds: 10
+                },
+                File: {
+                    // The directory where the files are stored
+                    // Which relative to the build directory
+                    // Or in other words the current working directory
+                    dir: './files'
                 }
             },
             source: {

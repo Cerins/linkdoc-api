@@ -1,4 +1,5 @@
 import ILogger from '../../../utils/interface/logger';
+import type WritableStream from 'stream';
 
 interface IReq {
   body: unknown;
@@ -13,7 +14,7 @@ type LogData = {
   [key: string]: unknown;
 };
 
-interface IRes {
+type IRes = NodeJS.WritableStream & {
   json: (data: unknown) => void;
   status: (code: number) => IRes;
   locals: {

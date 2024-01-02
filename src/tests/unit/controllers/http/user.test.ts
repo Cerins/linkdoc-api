@@ -1,13 +1,15 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import defineHTTPUserController, {
+import defineHTTPController, {
     HTTPUserControllerType
-} from '../../../../controllers/http/user';
+} from '../../../../controllers/http';
 import { ReqError } from '../../../../controllers/http/utils/resHandler';
 import JWT from '../../../../utils/jwt';
 import { ZodError } from 'zod';
 import SQLiteGateways from '../../../../app/gateways/sqlite';
 import { IUser } from '../../../../app/models/interface/user';
 import Models from '../../../../app/models';
+import config from '../../../../config';
+import { Writable } from 'stream';
 
 describe('HTTP User controller', () => {
     describe('Login', () => {
@@ -31,17 +33,28 @@ describe('HTTP User controller', () => {
                 },
                 status: vi.fn()
             };
-        });
+        }) as any;
         const nextMock = vi.fn();
-        const res = {
-            json: jsonMock,
-            status: statusMock,
-            locals: {
+        // const res = {
+        //     json: jsonMock,
+        //     status: statusMock,
+        //     locals: {
+        //         logger: {
+        //             log: loggerErrorMock
+        //         }
+        //     }
+        // };
+        // Mock res by creating a mocked writeable stream
+        class WriteTableResMock extends Writable implements NodeJS.WritableStream {
+            json = jsonMock;
+            status = statusMock;
+            locals = {
                 logger: {
                     log: loggerErrorMock
                 }
-            }
-        };
+            };
+        }
+        const res = new WriteTableResMock();
         let HTTPUserController!: HTTPUserControllerType;
         let user!: IUser;
         beforeEach(async () => {
@@ -53,8 +66,9 @@ describe('HTTP User controller', () => {
                 gateways
             });
             user = await models.User.register(usrInfo.name, usrInfo.password);
-            HTTPUserController = defineHTTPUserController({
-                models
+            HTTPUserController = defineHTTPController({
+                models,
+                config: config
             });
             jsonMock.mockClear();
             statusMock.mockClear();

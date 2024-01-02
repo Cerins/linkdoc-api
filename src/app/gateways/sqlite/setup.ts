@@ -109,11 +109,11 @@ const sqliteTableSetup = [
             fileStorageType INTEGER NOT NULL,
             filePath TEXT NULL,
             fileBlob BLOB NULL,
-            file_docID INTEGER NOT NULL,
+            file_colID INTEGER NOT NULL,
             file_usrID INTEGER NOT NULL,
             fileCreatedAt TIMESTAMP NOT NULL,
-            FOREIGN KEY (file_docID)
-            REFERENCES Document(docID)
+            FOREIGN KEY (file_colID)
+            REFERENCES Collection(colID)
                 ON UPDATE CASCADE
                 ON DELETE CASCADE,
             FOREIGN KEY (file_usrID)
@@ -122,10 +122,10 @@ const sqliteTableSetup = [
                 ON DELETE CASCADE
         )
     `,
-    // Index on file_docID and file_usrID since they will potentially searched by
+    // Index on file_colID and file_usrID since they will potentially searched by
     // Potentially remove these if they are not used
     `
-            CREATE INDEX IF NOT EXISTS idx_file_docID on File(file_docID);
+            CREATE INDEX IF NOT EXISTS idx_file_colID on File(file_colID);
     `,
     `
             CREATE INDEX IF NOT EXISTS idx_file_usrID on File(file_usrID);

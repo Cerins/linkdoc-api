@@ -3,6 +3,7 @@ import { CacheGatewayType } from '../gateways/interface/cache';
 import type { CollectionGatewayType } from '../gateways/interface/collection';
 import { CollectionOpenedGatewayType } from '../gateways/interface/collectionOpened';
 import type { DocumentGatewayType } from '../gateways/interface/document';
+import { FileGatewayType } from '../gateways/interface/file';
 import type { UserGatewayType } from '../gateways/interface/user';
 import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 import defineCollection from './collection';
@@ -20,6 +21,7 @@ interface Dependencies {
     Document: DocumentGatewayType;
     CollectionOpened: CollectionOpenedGatewayType;
     Cache: CacheGatewayType;
+    File: FileGatewayType;
   };
 }
 

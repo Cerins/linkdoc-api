@@ -1,6 +1,3 @@
-import { IUserGateway } from '../../app/gateways/interface/user';
-import { IUserCollectionGateway } from '../../app/gateways/interface/userCollection';
-import PubSub from '../../app/gateways/memory/pubsub';
 import { ICollectionType } from '../../app/models/interface/collection';
 import { IDocumentType } from '../../app/models/interface/document';
 import { IUserType } from '../../app/models/interface/user';
@@ -9,7 +6,7 @@ import ExpressAPI from '../../routers/http/express';
 import WSWebsocket from '../../routers/websocket/ws';
 import ILogger from '../../utils/interface/logger';
 import Writer from '../../utils/writer';
-import { HTTPUserControllerType } from '../http/user';
+import { HTTPUserControllerType as HTTPControllerType } from '../http';
 import { SocketControllerType } from '../websocket';
 
 interface Dependencies {
@@ -19,7 +16,7 @@ interface Dependencies {
         Document: IDocumentType,
     },
     controllers: {
-        HTTPUserController: HTTPUserControllerType
+        HTTPController: HTTPControllerType
         SocketController: SocketControllerType
     },
     logger: ILogger,

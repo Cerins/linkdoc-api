@@ -1,4 +1,4 @@
-import defineHTTPUserController from './controllers/http/user';
+import defineHTTPController from './controllers/http';
 import createLogger from './utils/logger';
 import defineSocketController from './controllers/websocket';
 import SQLiteGateways from './app/gateways/sqlite';
@@ -36,8 +36,9 @@ async function main() {
         gateways
     });
     const controllers = {
-        HTTPUserController: defineHTTPUserController({
-            models
+        HTTPController: defineHTTPController({
+            models,
+            config
         }),
         SocketController: defineSocketController({
             config: {

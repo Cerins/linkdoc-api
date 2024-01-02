@@ -19,6 +19,8 @@ import Lock from '../memory/lock';
 import { LockGatewayType } from '../interface/lock';
 import { CacheGatewayType } from '../interface/cache';
 import Cache from '../memory/cache';
+import { FileGatewayType } from '../interface/file';
+import defineFileGateway from './file';
 
 // Create a collection of gateways that use SQLite
 // Because this is a preset i do not see the damage of
@@ -32,6 +34,7 @@ export default class SQLiteGateways {
     PubSub: PubSubGatewayType;
     Lock: LockGatewayType;
     Cache: CacheGatewayType;
+    File: FileGatewayType;
     constructor(db: Knex) {
         this.User = defineUserGateway({
             db
@@ -48,9 +51,16 @@ export default class SQLiteGateways {
         this.CollectionOpened = defineCollectionOpenedGateway({
             db
         });
+        this.File = defineFileGateway({
+            db,
+            config: {
+                dir: config.app.model.File.dir
+            }
+        });
         this.PubSub = PubSub;
         this.Lock = Lock;
         this.Cache = Cache;
+
     }
     public static async create(logger: ILogger) {
         const db = await buildDB(

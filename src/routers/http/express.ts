@@ -3,7 +3,7 @@ import session from 'express-session';
 import cors from 'cors';
 import { ZodError } from 'zod';
 import csrf from 'csurf';
-import type { HTTPUserControllerType } from '../../controllers/http/user';
+import type { HTTPUserControllerType as HTTPControllerType } from '../../controllers/http';
 import ILogger from '../../utils/interface/logger';
 import ResponseHelper, {
     INext,
@@ -14,7 +14,7 @@ import ResponseHelper, {
 
 interface Dependencies {
   controllers: {
-    HTTPUserController: HTTPUserControllerType;
+    HTTPController: HTTPControllerType;
   };
   logger: ILogger;
   config: {
@@ -82,7 +82,9 @@ class ExpressAPI {
             credentials: true,
             origin: this.config.cors.origin
         }));
+        // Allow to parse form data
         this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
         // TODO use redis when appropriate
         this.app.use(session({
             secret: this.config.session.secret,
@@ -121,7 +123,7 @@ class ExpressAPI {
     }
 
     protected initRoutes() {
-        const { HTTPUserController } = this.dependencies.controllers;
+        const { HTTPController: HTTPController } = this.dependencies.controllers;
         const csrfProtection = csrf({ cookie: false });
         // Now why doesn't this route have CSRF protection?
         // Well it is rather simple, because it does not create a session
@@ -129,7 +131,7 @@ class ExpressAPI {
         // And since malicious website can't read the token from the response,
         // (assuming the browser is enforcing the Same Origin Policy)
         // It can't use it to connect to the websocket
-        this.app.post('/auth/login', HTTPUserController.login);
+        this.app.post('/auth/login', HTTPController.login);
         this.app.post(
             '/auth/csrf',
             csrf({ cookie: false, ignoreMethods: ['POST'] }),
@@ -142,10 +144,12 @@ class ExpressAPI {
         // Since /auth/session returns a JWT token
         // Which can't be read by malicious website
         // (assuming the browser is enforcing the Same Origin Policy)
-        this.app.post('/auth/session', HTTPUserController.session);
+        this.app.post('/auth/session', HTTPController.session);
         // Here is a legit use case for CSRF protection
         // Since I do not want a malicious website to log out the user
-        this.app.post('/auth/logout', HTTPUserController.logout);
+        this.app.post('/auth/logout', HTTPController.logout);
+        this.app.post('/file', HTTPController.fileUpload);
+        this.app.get('/file/:uuid', HTTPController.fileDownload);
     }
 
     protected initErrorHandlers() {

@@ -18,6 +18,8 @@ interface ICollection {
     delete(): Promise<void>
     readBy(usrID: string): Promise<void>
     sharedTo(): Promise<{ name: string, visibility: ColVisibility | undefined }[]>
+    createFile(path: string, usrID: string): Promise<string>
+    readFile(uuid: string): Promise<NodeJS.ReadableStream | undefined>
 }
 interface ICollectionType {
     findOne(properties: {
@@ -25,6 +27,8 @@ interface ICollectionType {
         uuid?: string;
     }): Promise<ICollection | undefined>
     new (collection: ICollectionGateway): ICollection
+    // Method which returns a collection which has the given file
+    forFile(uuid: string): Promise<ICollection | undefined>
 }
 
 export type {

@@ -9,6 +9,9 @@ const schema = z.object({
         model: z.object({
             User: z.object({
                 saltRounds: z.number()
+            }),
+            File: z.object({
+                dir: z.string()
             })
         }),
         source: z.object({

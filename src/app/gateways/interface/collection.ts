@@ -26,8 +26,10 @@ interface CollectionGatewayType
 
 }
 
-export {
+export type {
     ICollectionGateway,
-    CollectionGatewayType,
+    CollectionGatewayType
+};
+export {
     ColVisibility
 };

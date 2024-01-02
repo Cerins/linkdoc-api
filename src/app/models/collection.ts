@@ -6,6 +6,7 @@ import type {
 } from '../gateways/interface/collection';
 import { CollectionOpenedGatewayType } from '../gateways/interface/collectionOpened';
 import { DocumentGatewayType } from '../gateways/interface/document';
+import { FileGatewayType } from '../gateways/interface/file';
 import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
 import { defineDocumentCache } from './document';
 import type { ICollection } from './interface/collection';
@@ -18,6 +19,7 @@ interface Dependencies {
         Document: DocumentGatewayType
         CollectionOpened: CollectionOpenedGatewayType
         Cache: CacheGatewayType
+        File: FileGatewayType
     },
     models: {
         Document: IDocumentType
@@ -191,6 +193,33 @@ export default function defineCollection(dependencies: Dependencies) {
             return this.collection.sharedTo();
         }
 
+        public async createFile(path: string, usrID: string) {
+            const { File } = this.dependencies.gateways;
+            const file = await File.register(path, {
+                collectionID: this.id,
+                usrID
+            });
+            return file.uuid;
+        }
+
+        public async readFile(uuid: string) {
+            const { File } = this.dependencies.gateways;
+            const file = await File.find(uuid);
+            if(file === undefined) {return undefined;}
+            if(file.collectionID !== this.id) {return undefined;}
+            return file.stream();
+        }
+
+        public static async forFile(uuid: string) {
+            const { File } = this.dependencies.gateways;
+            const file = await File.find(uuid);
+            if(file === undefined) {return undefined;}
+            const collection = await this.findOne({
+                id: file.collectionID
+            });
+            if(collection === undefined) {return undefined;}
+            return collection;
+        }
     }
     return Collection;
 }
