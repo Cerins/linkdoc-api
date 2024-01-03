@@ -48,6 +48,15 @@ class ConsoleController {
     }
 
     public async userRegister(name: string, password: string) {
+        if(password.length < 8) {
+            throw new Error('password too short');
+        }
+        if(name.length >= 32) {
+            throw new Error('name too long');
+        }
+        if(name.length <= 0) {
+            throw new Error('name too short');
+        }
         await this.dependencies.models.User.register(name, password);
     }
 

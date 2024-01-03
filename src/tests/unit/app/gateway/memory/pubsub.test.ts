@@ -9,11 +9,11 @@ const msg2 = 'msg2';
 const id1 = 'id1';
 const id2 = 'id2';
 
-// TODO these can actually be used for redis also
+//  These tests can actually be used for redis also
 // since their interface is the same
 // although running tests with outside systems
-// is a "shady" things, since the tests are run as multiple processes
-// tests can be in an unstable state
+// is a "shady" thing, since the tests are run as multiple processes
+// thus tests can be in an unstable state
 describe('PubSub memory', ()=>{
     const cb1 = vi.fn();
     const cb2 = vi.fn();

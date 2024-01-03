@@ -288,6 +288,7 @@ function defineHTTPController(dependencies: Dependencies) {
             }
             // Send the file
             // Have to cast to because my res is not write stream
+            // Set that the encoding is utf-8
             file.pipe(res);
         }
     }

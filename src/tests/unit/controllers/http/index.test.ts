@@ -35,16 +35,6 @@ describe('HTTP User controller', () => {
             };
         }) as any;
         const nextMock = vi.fn();
-        // const res = {
-        //     json: jsonMock,
-        //     status: statusMock,
-        //     locals: {
-        //         logger: {
-        //             log: loggerErrorMock
-        //         }
-        //     }
-        // };
-        // Mock res by creating a mocked writeable stream
         class WriteTableResMock extends Writable implements NodeJS.WritableStream {
             json = jsonMock;
             status = statusMock;
@@ -108,7 +98,8 @@ describe('HTTP User controller', () => {
             const req = {
                 body: {
                     username: usrInfo.name,
-                    password: usrInfo.password
+                    password: usrInfo.password,
+                    remember: true
                 },
                 params: {},
                 query: {},
@@ -187,4 +178,160 @@ describe('HTTP User controller', () => {
             expect(nextMock).toBeCalledWith(expect.any(ZodError));
         });
     });
+    describe('Session', () => {
+        const usrInfo = {
+            name: 'usrName',
+            password: 'usrPassword'
+        };
+        const wrongUsrInfo = {
+            name: 'wrongUsrName',
+            password: 'wrongUsrPassword'
+        };
+        const loggerErrorMock = vi.fn();
+        const jsonMock = vi.fn();
+        const statusMock = vi.fn(() => {
+            return {
+                json: jsonMock,
+                locals: {
+                    logger: {
+                        log: loggerErrorMock
+                    }
+                },
+                status: vi.fn()
+            };
+        }) as any;
+        const nextMock = vi.fn();
+        class WriteTableResMock extends Writable implements NodeJS.WritableStream {
+            json = jsonMock;
+            status = statusMock;
+            locals = {
+                logger: {
+                    log: loggerErrorMock
+                }
+            };
+        }
+        const res = new WriteTableResMock();
+        let HTTPUserController!: HTTPUserControllerType;
+        let user!: IUser;
+        beforeEach(async () => {
+            // Delete all users
+            const gateways = await SQLiteGateways.create({
+                log: loggerErrorMock
+            });
+            const models = new Models({
+                gateways
+            });
+            user = await models.User.register(usrInfo.name, usrInfo.password);
+            HTTPUserController = defineHTTPController({
+                models,
+                config: config
+            });
+            jsonMock.mockClear();
+            statusMock.mockClear();
+            loggerErrorMock.mockClear();
+            nextMock.mockClear();
+        });
+        test('Throw an error when the user is not logged in', async () => {
+            const req = {
+                body: {},
+                params: {},
+                query: {},
+                session: {}
+            };
+            await HTTPUserController.session(req, res, nextMock);
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(ReqError));
+        });
+        test('Successfully get the user session', async () => {
+            const req = {
+                body: {},
+                params: {},
+                query: {},
+                session: {
+                    usrID: user.id
+                }
+            };
+            await HTTPUserController.session(req, res, nextMock);
+            expect(nextMock).not.toHaveBeenCalled();
+            expect(jsonMock).toHaveBeenCalledTimes(1);
+            expect(jsonMock).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    message: 'AUTH_SUCCESS',
+                    data: {
+                        name: usrInfo.name,
+                        token: expect.any(String)
+                    },
+                    description: 'Authentication successful'
+                })
+            );
+        });
+        test('Throw an error if session usrID does not exist', async () => {
+            const req = {
+                body: {},
+                params: {},
+                query: {},
+                session: {
+                    usrID: 'wrongUsrID'
+                }
+            };
+            await HTTPUserController.session(req, res, nextMock);
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(ReqError));
+        }
+        );
+        test('Throw an error if can not destroy session', async () => {
+            const req = {
+                body: {},
+                params: {},
+                query: {},
+                session: {
+                }
+            };
+            await HTTPUserController.session(req, res, nextMock);
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(Error));
+        });
+        test('Successfully logout', async () => {
+            const req = {
+                body: {},
+                params: {},
+                query: {},
+                session: {
+                    usrID: user.id,
+                    destroy: (cb: ()=>void)=>{
+                        cb();
+                    }
+                }
+            };
+            await HTTPUserController.logout(req, res, nextMock);
+            expect(nextMock).not.toHaveBeenCalled();
+            expect(jsonMock).toHaveBeenCalledTimes(1);
+            expect(jsonMock).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    message: 'OK',
+                    description: 'Ok'
+                })
+            );
+        });
+        test('Session destroy error', async () => {
+            const req = {
+                body: {},
+                params: {},
+                query: {},
+                session: {
+                    usrID: user.id,
+                    destroy: (cb: (err: unknown)=>void)=>{
+                        cb(new Error('Session destroy error'));
+                    }
+                }
+            };
+            await HTTPUserController.logout(req, res, nextMock);
+            expect(nextMock).toHaveBeenCalledTimes(1);
+            expect(nextMock).toBeCalledWith(expect.any(Error));
+        }
+        );
+
+
+    });
 });
+

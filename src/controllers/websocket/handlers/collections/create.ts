@@ -4,18 +4,25 @@ import outputType from '../../utils/outputType';
 import errorHandler from '../../utils/error/handler';
 import RequestError from '../../utils/error/request';
 
-// For this endpoint we need to create a collection
-// has
 const payloadSchema = z.object({
     name: z.string()
 });
+/**
+ * Handler function for creating a collection.
+ *
+ * @param payload - The payload containing the collection name.
+ * @param type - The original request type.
+ * @param acknowledge - The user supplied acknowledge string.
+ * @returns void
+ * @throws RequestError if the collection name is too short or too long.
+ */
 const create: HandlerFn = errorHandler(async function (
     payload,
     type,
     acknowledge
 ) {
     const { name } = await payloadSchema.parseAsync(payload);
-    // TODO move this to config
+    // Name too short, bad request
     if (name.length < 1) {
         throw new RequestError({
             type: 'BAD_REQUEST',
@@ -25,6 +32,7 @@ const create: HandlerFn = errorHandler(async function (
             }
         });
     }
+    // Name too long, bad request
     if (name.length >= 32) {
         throw new RequestError({
             type: 'BAD_REQUEST',
@@ -34,12 +42,16 @@ const create: HandlerFn = errorHandler(async function (
             }
         });
     }
+    // If everything is fine, create the collection
     const collection = await this.user.createCollection(name);
     this.emit(
         outputType(type, 'OK'),
         {
+            // Collection public id
             uuid: collection.uuid,
+            // Its name
             name: collection.name,
+            // Its owner
             user: this.user.name,
             visibility: collection.visibility,
             description: collection.description
