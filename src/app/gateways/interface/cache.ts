@@ -6,7 +6,7 @@ export interface ICacheGateway {
   // Set the value which is stored in cached
   set(name: string, value: JSONValue, timeout?: number): Promise<void>;
   del(name: string): Promise<void>;
-  clear(): Promise<void>;
+  clear(startsWith?: string): Promise<void>;
 }
 
 export type ValueResolver = (name: string) => Promise<JSONValue>;

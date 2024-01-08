@@ -7,7 +7,7 @@
 const sqliteTableSetup = [
     `
         CREATE TABLE IF NOT EXISTS User (
-            usrID INTEGER PRIMARY KEY,
+            usrID INTEGER PRIMARY KEY AUTOINCREMENT,
             usrName TEXT NOT NULL UNIQUE,
             usrPassword TEXT NOT NULL,
             usrCreatedAt TIMESTAMP NOT NULL
@@ -19,7 +19,7 @@ const sqliteTableSetup = [
     // name is used to search
     `
         CREATE TABLE IF NOT EXISTS Collection (
-            colID INTEGER PRIMARY KEY,
+            colID INTEGER PRIMARY KEY AUTOINCREMENT,
             colUUID TEXT NOT NULL UNIQUE,
             colName TEXT NOT NULL,
             colDescription TEXT NULL,
@@ -42,7 +42,7 @@ const sqliteTableSetup = [
     `,
     `
         CREATE TABLE IF NOT EXISTS UserCollection (
-            uclID INTEGER PRIMARY KEY,
+            uclID INTEGER PRIMARY KEY AUTOINCREMENT,
             ucl_usrID INTEGER NOT NULL,
             ucl_colID INTEGER NOT NULL,
             uclCreatedAt TIMESTAMP NOT NULL,
@@ -60,7 +60,7 @@ const sqliteTableSetup = [
     `,
     `
         CREATE TABLE IF NOT EXISTS Document (
-            docID INTEGER PRIMARY KEY,
+            docID INTEGER PRIMARY KEY AUTOINCREMENT,
             docName TEXT NOT NULL,
             docText TEXT NOT NULL,
             doc_colID INTERGER NOT NULL,
@@ -79,7 +79,7 @@ const sqliteTableSetup = [
     `,
     `
         CREATE TABLE IF NOT EXISTS CollectionOpened (
-            cloID INTEGER PRIMARY KEY,
+            cloID INTEGER PRIMARY KEY AUTOINCREMENT,
             clo_usrID INTEGER NOT NULL,
             clo_colID INTEGER NOT NULL,
             cloCreatedAt TIMESTAMP NOT NULL,
@@ -104,7 +104,7 @@ const sqliteTableSetup = [
     // But this makes it easier to read
     `
         CREATE TABLE IF NOT EXISTS File (
-            fileID INTEGER PRIMARY KEY,
+            fileID INTEGER PRIMARY KEY AUTOINCREMENT,
             fileUUID TEXT NOT NULL UNIQUE,
             fileStorageType INTEGER NOT NULL,
             filePath TEXT NULL,
@@ -129,6 +129,9 @@ const sqliteTableSetup = [
     `,
     `
             CREATE INDEX IF NOT EXISTS idx_file_usrID on File(file_usrID);
+    `,
+    `
+            PRAGMA foreign_keys = ON;
     `
 
 ];

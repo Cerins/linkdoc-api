@@ -2,7 +2,7 @@ import TextOperation from '../../utils/ot/text-operation';
 import WrappedOperation from '../../utils/ot/wrapped-operation';
 import Selection from '../../utils/ot/selection';
 import Server from '../../utils/ot/server';
-import { CacheGatewayType } from '../gateways/interface/cache';
+import { CacheGatewayType, ICacheGateway } from '../gateways/interface/cache';
 import {
     IDocumentGateway,
     DocumentGatewayType
@@ -19,7 +19,7 @@ interface Dependencies {
   };
 }
 
-
+let dc: ICacheGateway | null = null;
 // Create a singleton
 export function defineDocumentCache(dependencies: {
   gateways: {
@@ -28,7 +28,10 @@ export function defineDocumentCache(dependencies: {
   };
 }) {
     const { Cache, Document } = dependencies.gateways;
-    return new Cache({
+    if(dc !== null) {
+        return dc;
+    }
+    dc = new Cache({
         namespace: 'documents',
         timeout: 1000 * 60,
         resolver: async (name) => {
@@ -58,7 +61,11 @@ export function defineDocumentCache(dependencies: {
             await document.save();
         }
     });
+    return dc;
+
 }
+
+let tc: ICacheGateway | null = null;
 
 export function defineTransformCache(dependencies: {
   gateways: {
@@ -67,13 +74,18 @@ export function defineTransformCache(dependencies: {
   };
 }) {
     const { Cache } = dependencies.gateways;
-    return new Cache({
+    if(tc !== null) {
+        return tc;
+    }
+    tc = new Cache({
         namespace: 'documents:transforms',
         timeout: 1000 * 60 * 60,
         resolver: async (name) => {
             return [];
         }
     });
+    return tc;
+
 }
 
 export default function defineDocument(dependencies: Dependencies) {

@@ -79,19 +79,33 @@ const Cache: CacheGatewayType = class CacheInner implements ICacheGateway {
     private async cleanup(name: string) {
         this.names.delete(name);
         const fname = this.fullName(name);
-        // Check if there is a backuper( a way of moving the item to non-volatile storage)
-        const cached = CacheInner.cached.get(fname)!;
-        if (this.backuper && cached.backup) {
-            await this.backuper(name, cached.value);
+        const cached = CacheInner.cached.get(fname);
+        if(cached) {
+            // Check if there is a backuper( a way of moving the item to non-volatile storage)
+            if (this.backuper && cached.backup) {
+                await this.backuper(name, cached.value);
+            }
+            // Check if there is a timeout
+            const { timeout } = cached;
+            if (timeout !== null) {
+                clearTimeout(timeout);
+            }
         }
         CacheInner.cached.delete(fname);
     }
 
-    public async clear() {
+    public async clear(startsWith?: string) {
         await Promise.all(
-            [...this.names].map(async (name) => {
-                await this.cleanup(name);
-            })
+            [...this.names]
+                .filter((name) => {
+                    if (startsWith === undefined) {
+                        return true;
+                    }
+                    return name.startsWith(startsWith);
+                })
+                .map(async (name) => {
+                    await this.cleanup(name);
+                })
         );
     }
 
