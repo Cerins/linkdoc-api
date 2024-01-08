@@ -18,6 +18,8 @@ const documentRead: HandlerFn = errorHandler(async function (
 ) {
     const { colUUID, docName } = await payloadSchema.parseAsync(payload);
     const col = await collectionChecked(this, colUUID, ColVisibility.READ);
+    // Set read metadata
+    await col.readBy(this.user.id);
     const documentForRes = {
         name: docName,
         text: '',
