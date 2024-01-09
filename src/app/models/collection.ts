@@ -8,7 +8,7 @@ import { CollectionOpenedGatewayType } from '../gateways/interface/collectionOpe
 import { DocumentGatewayType } from '../gateways/interface/document';
 import { FileGatewayType } from '../gateways/interface/file';
 import type { UserCollectionGatewayType } from '../gateways/interface/userCollection';
-import { defineDocumentCache, defineTransformCache } from './document';
+import { DocumentCache } from './document';
 import type { ICollection } from './interface/collection';
 import type { IDocumentType } from './interface/document';
 
@@ -31,9 +31,7 @@ interface Dependencies {
  * @returns The Collection class.
  */
 export default function defineCollection(dependencies: Dependencies) {
-    const documentsCache = defineDocumentCache(dependencies);
-    const transformCache = defineTransformCache(dependencies);
-
+    const documentsCache = DocumentCache.getCache(dependencies);
     /**
      * Represents a collection.
      */

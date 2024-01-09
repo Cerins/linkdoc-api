@@ -73,6 +73,9 @@ const fileDownloadPathParams = z.object({
     uuid: z.string()
 });
 
+/**
+ * Check if the request has a session  - the server knows who the user is through a cookie
+ */
 function hasSession(req: IReq): req is IReq & { session: { usrID: string } } {
     return typeof req.session === 'object'
         && req.session !== null
@@ -80,6 +83,9 @@ function hasSession(req: IReq): req is IReq & { session: { usrID: string } } {
         && typeof req.session.usrID === 'string';
 }
 
+/**
+ * Check if we can destroy the session
+ */
 function sessionDestroyAvailable(req: IReq):
  req is IReq & { session: { destroy: (cb: (err: unknown)=>void)=>void } } {
     return typeof req.session === 'object'
@@ -89,7 +95,7 @@ function sessionDestroyAvailable(req: IReq):
 }
 
 function defineHTTPController(dependencies: Dependencies) {
-    const fileSizeLimit = 1024*1024*10; // 10MB
+    const fileSizeLimit = 1024*1024*10; // 10MB TODO: Move to config
     // Check the config
     const storage = multer.diskStorage({
         destination: (req, file, cb)=>{
@@ -132,6 +138,7 @@ function defineHTTPController(dependencies: Dependencies) {
                     reason: 'Invalid password'
                 });
             }
+            // Potentially do not store the session
             if(remember) {
                 (req.session as {
                 usrID: string
@@ -144,7 +151,9 @@ function defineHTTPController(dependencies: Dependencies) {
                 token: jwt.sign()
             });
         }
-
+        /**
+         * Get JWT token for WS based on the current session
+         */
         @async()
         static async session(req: IReq, res: IRes, next: unknown) {
             const { User } = dependencies.models;

@@ -34,11 +34,15 @@ class WSWebsocket {
     constructor(dependencies: Dependencies) {
         this.dependencies = dependencies;
         const { SocketController } = dependencies.controllers;
+        // Create the server
         this.server = http.createServer({});
         this.wss = new WebSocket.Server({ noServer: true });
         this.wss.on('connection', (controller: ISocketController) => {
             controller.connect();
         });
+        // And use SocketController static method to handle the upgrade
+        // It will have to have this binded
+        // So that we can emit the events
         this.server.on('upgrade', SocketController.onUpgrade.bind(this.wss));
     }
 

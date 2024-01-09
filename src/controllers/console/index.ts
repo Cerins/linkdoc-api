@@ -59,7 +59,10 @@ class ConsoleController {
         }
         await this.dependencies.models.User.register(name, password);
     }
-
+    /**
+     * Start the Express HTTP server
+     * No dependency injection here, because minimal changes if express is to be replaced
+     */
     public async httpStart() {
         const httpRouter = new ExpressAPI({
             ...this.dependencies,
@@ -69,7 +72,9 @@ class ConsoleController {
         });
         await httpRouter.start();
     }
-
+    /**
+     * Start the WebSocket server, which uses the ws library
+     */
     public async wsStart() {
         const wsRouter = new WSWebsocket({
             ...this.dependencies,

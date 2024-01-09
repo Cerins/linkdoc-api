@@ -1,4 +1,3 @@
-// TODO const enum works weird
 /* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 import { IObjectGateway, ObjectGatewayType } from './object';

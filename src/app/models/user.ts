@@ -27,6 +27,9 @@ interface Config {
 function defineUser(dependencies: Dependencies, config?: Config) {
     const saltRounds = config?.saltRounds ?? 10;
 
+    /**
+     * Represents a User.
+     */
     class User {
         private user: IUserGateway;
 
@@ -55,6 +58,11 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return await bcrypt.compare(password, hash);
         }
 
+        /**
+         *  Validate the password of the user
+         * @param password plain text password
+         * @returns is the password is valid
+         */
         public validatePassword(password: string) {
             return User.compare(password, this.user.password);
         }
@@ -67,6 +75,12 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             return User.dependencies;
         }
 
+        /**
+         * Register a new user
+         * @param name The username
+         * @param password The plain text password
+         * @returns The new user
+         */
         public static async register(name: string, password: string) {
             const user = new this.dependencies.gateways.User();
             user.name = name;
@@ -87,7 +101,11 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             }
             return new User(user);
         }
-
+        /**
+         * Create a new collection
+         * @param name The name of the collection
+         * @returns The new collection
+         */
         public async createCollection(name: string) {
             const collectionRef = new this.dependencies.gateways.Collection();
             collectionRef.userID = this.id;
@@ -96,7 +114,11 @@ function defineUser(dependencies: Dependencies, config?: Config) {
             await collectionRef.save();
             return new this.dependencies.models.Collection(collectionRef);
         }
-
+        /**
+         * Get the list of collections of the user
+         * @param args All the options
+         * @returns The list of collections
+         */
         public async getCollectionList(...args: getCollectionListArgs) {
             return this.user.getCollectionList(...args);
         }

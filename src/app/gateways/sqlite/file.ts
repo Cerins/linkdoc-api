@@ -48,6 +48,8 @@ export default function defineFileGateway(dependencies: Dependencies): FileGatew
             collectionID: string;
             usrID: string;
         }) {
+            // Insert metadata about the file
+            // In the database
             const uuid = v4();
             await db('File')
                 .insert({

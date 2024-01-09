@@ -4,6 +4,7 @@ import { ErrorHandlerPlugin } from '../generic';
 
 export const gateway: ErrorHandlerPlugin = (err) => {
     if(err instanceof GatewayError) {
+        // Handle SQL unique constraint violation
         if(err.code === 'CONSTRAINT_VIOLATION') {
             return new RequestError({
                 type: 'BAD_REQUEST',

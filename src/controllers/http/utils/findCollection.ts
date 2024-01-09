@@ -14,7 +14,9 @@ const COLResponse = new ResponseHelper({
         description: 'No access'
     }
 });
-
+/**
+ * Wrap the original function to throw proper HTTP errors
+ */
 export default async function collectionChecked(
     ...args: Args
 ) {

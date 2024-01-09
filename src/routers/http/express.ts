@@ -74,8 +74,6 @@ class ExpressAPI {
     }
 
     protected initMiddlewares() {
-        // Setup json body parser
-        // TODO cors
         this.app.set('trust proxy', this.config.trustProxy);
         this.app.use(cors({
             methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
@@ -159,6 +157,7 @@ class ExpressAPI {
             logger.log('warn', 'Not found');
             GenericResponse.send(res, 'NOT_FOUND');
         });
+        // Handle some generic errors
         this.app.use((err: Error, req: IReq, res: IRes, next: INext) => {
             const { logger } = res.locals;
             // logger.log('error', 'VERY LARGE ERROR');

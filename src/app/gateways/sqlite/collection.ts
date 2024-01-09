@@ -30,6 +30,7 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
     );
     class Collection extends Base implements ICollectionGateway {
         public override async save() {
+            // Generate uuid if it is not present
             const target = this as unknown as {
                 _data: Map<string, unknown>
             };
@@ -39,6 +40,11 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
             }
             await super.save();
         }
+        /**
+         * Get the access level of the user
+         * @param usrID The user which access level is to be checked
+         * @returns The access level of the user
+         */
         public async accessLevel(usrID?: string) {
             // Max collection access level is write
             const maxLevelAccess = ColVisibility.WRITE;
@@ -80,6 +86,10 @@ export default function defineCollectionGateway(dependencies: Dependencies) {
             // If that is not the case, this should be change
             return maxVisibility['visibility'];
         }
+        /**
+         * Get the list of users with whom the collection is shared
+         * @returns The list of users with whom the collection is shared
+         */
         public async sharedTo() {
             const users = await db('UserCollection')
                 .select('usrName as name', 'uclVisibility as visibility')

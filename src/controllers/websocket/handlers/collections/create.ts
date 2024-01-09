@@ -7,15 +7,7 @@ import RequestError from '../../utils/error/request';
 const payloadSchema = z.object({
     name: z.string()
 });
-/**
- * Handler function for creating a collection.
- *
- * @param payload - The payload containing the collection name.
- * @param type - The original request type.
- * @param acknowledge - The user supplied acknowledge string.
- * @returns void
- * @throws RequestError if the collection name is too short or too long.
- */
+
 const create: HandlerFn = errorHandler(async function (
     payload,
     type,

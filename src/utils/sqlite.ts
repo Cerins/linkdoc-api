@@ -10,6 +10,7 @@ interface Dependencies {
   logger: ILogger;
 }
 
+// Prepare a knex instance which is connected to sqlite3
 async function buildDB(dependencies: Dependencies, upScripts?: string[]) {
     const { filename } = dependencies.config;
     // Setup knex with sqlite3
@@ -44,15 +45,15 @@ async function buildDB(dependencies: Dependencies, upScripts?: string[]) {
 
     });
     db.on('query', (query) => {
-        // dependencies.logger.log('info', 'SQLITE QUERY', {
-        //     query: {
-        //         method: query.method,
-        //         sql: query.sql
-        //         // Do not want to see this this is potentially sensitive
-        //         // bindings: query.bindings
-        //         // Or in other words: "speak no evil"
-        //     }
-        // });
+        // Maybe allow in the config to disable this
+        dependencies.logger.log('info', 'SQLITE QUERY', {
+            query: {
+                method: query.method,
+                sql: query.sql
+                // Do not want to see this this is potentially sensitive
+                // bindings: query.bindings
+            }
+        });
     });
     // Run setup scripts
     if (upScripts && upScripts.length > 0) {

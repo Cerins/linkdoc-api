@@ -3,10 +3,6 @@ import { ColVisibility } from '../../../../app/gateways/interface/collection';
 import docRoom from '../../utils/documentRoom';
 import errorHandler from '../../utils/error/handler';
 import collectionChecked from '../../utils/findCollection';
-import Server from '../../../../utils/ot/server';
-import WrappedOperation from '../../../../utils/ot/wrapped-operation';
-import TextOperation from '../../../../utils/ot/text-operation';
-import Selection from '../../../../utils/ot/selection';
 import { z } from 'zod';
 
 // It just an array of objects that have a anchor and head properties
@@ -45,22 +41,32 @@ const documentOperation:HandlerFn = errorHandler(async function(
         selection
     } = await payloadSchema.parseAsync(payload);
     const col = await collectionChecked(this, colUUID, ColVisibility.WRITE);
+    // Lock the document
+    // To prevent race conditions
     const lock = await this.gateways.Lock.lock(`documents:${colUUID}:${docName}`);
     try {
         let doc = await col.findDocument(docName);
+        // If operating on empty document
+        // Create it
         if(doc === undefined) {
             doc = await col.createDocument(docName);
         }
         const clientID = this.sessionID;
+        // The new operation
         const wrappedPrime = await doc.transformRaw(
             operation,
             selection,
             revision
         );
+        // Allow the submitter to know that the operation has been received
+        // And that they can continue to send more
         this.emit(
             'DOC.ACK',
             {}
         );
+        // Send the operation to all other clients
+        // The original submitter has already applied the operation
+        // So we don't need to send it to them
         this.broadcastRoom(
             docRoom(colUUID, docName),
             'DOC.OPERATION.OK',
@@ -70,6 +76,7 @@ const documentOperation:HandlerFn = errorHandler(async function(
             }
         );
     } finally {
+        // In case of error
         await lock.unlock();
     }
 

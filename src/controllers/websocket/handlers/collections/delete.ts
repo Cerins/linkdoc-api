@@ -14,6 +14,7 @@ const collectionDelete: HandlerFn = errorHandler(async function (
 ) {
     const { uuid } = await payloadSchema.parseAsync(payload);
     const collection = await collectionChecked(this, uuid, null, true);
+    // Delete the collection
     await collection.delete();
     this.emit(
         outputType(type, 'OK'),

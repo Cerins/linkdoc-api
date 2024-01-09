@@ -3,6 +3,7 @@ import { ErrorHandlerPlugin } from '../generic';
 import RequestError from '../../request';
 
 export const zod: ErrorHandlerPlugin = (err) => {
+    // Handle Zod schema mismatch
     if(err instanceof ZodError) {
         return new RequestError({
             type: 'BAD_REQUEST',

@@ -5,6 +5,7 @@ import RequestError from '../request';
 
 type ErrorHandlerPlugin = (err: unknown) => RequestError | null;
 
+// Allows to register plugins for error handling
 export default function genericErrorHandler(plugins: ErrorHandlerPlugin[]) {
     return function (fn: HandlerFn) {
         const originalFn = fn;
@@ -18,6 +19,10 @@ export default function genericErrorHandler(plugins: ErrorHandlerPlugin[]) {
                 await originalFn.call(this, payload, type, acknowledge);
             } catch (error) {
                 let cE = error;
+                // Basically run all the plugins
+                // And see if one of them transforms the error
+                // To the RequestError
+                // If not then they all do not know how to handle the error
                 for (
                     let i = 0;
                     i < plugins.length && !(cE instanceof RequestError);

@@ -30,7 +30,6 @@ type IRequest = {
   socket: {
     remoteAddress?: string
   }
-  // TODO i would like to narrow down this type even more than unknown
   headers: Record<string, unknown>
 };
 
@@ -118,6 +117,7 @@ export default function defineSocketController(dependencies: Dependencies) {
     return class SocketController {
         protected static onMessageHandlers = new Map<string, HandlerFn>();
 
+        // Add a new way to handle incoming Socket messages
         public static registerHandler(
             name: string,
             handler: HandlerFn
@@ -183,6 +183,8 @@ export default function defineSocketController(dependencies: Dependencies) {
         // listen to all the events that happen in this room
         public join(room: string) {
             if(this.currentRoom !== null) { this.leave(this.currentRoom); }
+            // This unpack is needed to make sure that each message can be described as a string
+            // Some solutions only allow strings to be sent with the pubsub channel
             controllerPubSub.subscribe(room, this.sessionID, (message: string)=>{
                 const {
                     origin,
@@ -191,6 +193,7 @@ export default function defineSocketController(dependencies: Dependencies) {
                     payload,
                     acknowledge
                 } = Message.unpack(message);
+                // Do not emit a broadcast message to the sender
                 if(!(messageType === 'broadcast' && origin === this.sessionID)) {
                     this.emit(type, payload, acknowledge);
                 }
@@ -244,8 +247,7 @@ export default function defineSocketController(dependencies: Dependencies) {
         }
 
         protected errorMiddleware(err: unknown) {
-            // TODO We have to say to the user that they did send the message
-            // with proper schema
+            // TODO maybe do something more useful
             this.logger.log('error', 'Error happened', {
                 err
             });
@@ -308,8 +310,10 @@ export default function defineSocketController(dependencies: Dependencies) {
                 if (typeof token !== 'string') {
                     throw new Error('Token not found');
                 }
+                // We need to be sure that the token is valid
                 const jwt = JWT.validate(token);
                 const { User } = dependencies.models;
+                // Find the user based on the token
                 const user = await User.findOne({ id: jwt.get<string>('usrID') });
                 if (!user) {
                     throw new Error('User not found');
@@ -319,12 +323,17 @@ export default function defineSocketController(dependencies: Dependencies) {
             socket.on('error', SocketController.onError);
             auth()
                 .then((user: IUser) => {
+                    // If the user was found and authenticated
                     socket.removeListener('error', SocketController.onError);
+                    // We can do a callback
                     onComplete!(
                         null,
                         user
                     );
+                    // And also upgrade the socket
                     this.handleUpgrade(request, socket, head, (ws) => {
+                        // Get the ip from the requestor or if the proxy is trusted
+                        // then get the ip from the x-forwarded-for header
                         let ip = request.socket.remoteAddress ?? null;
                         if(dependencies.config.trustProxy) {
                             const forwardedFor = request.headers['x-forwarded-for'];
@@ -332,6 +341,8 @@ export default function defineSocketController(dependencies: Dependencies) {
                                 ip = forwardedFor;
                             }
                         }
+                        // Create a new socket controller
+                        // A way how call in the incoming messages will be handled
                         const socketController = new SocketController(ws, user, {
                             ip
                         });

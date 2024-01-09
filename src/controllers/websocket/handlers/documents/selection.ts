@@ -6,6 +6,8 @@ const documentSelection:HandlerFn = errorHandler(async function(
     type,
     acknowledge
 ) {
+    // Currently does nothing
+    // In the future, it will be used to see what other users are selecting
     // console.log('documentSelection', JSON.stringify(payload), type, acknowledge);
 });
 

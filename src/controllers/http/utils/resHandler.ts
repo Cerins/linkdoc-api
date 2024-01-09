@@ -1,5 +1,4 @@
 import ILogger from '../../../utils/interface/logger';
-import type WritableStream from 'stream';
 
 interface IReq {
   body: unknown;

@@ -1,3 +1,5 @@
+// Decorate the controller methods with this decorator
+// So promise rejection is handled
 export default function async() {
     // The target will controllers
     // which gets req, res and next

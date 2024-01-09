@@ -26,6 +26,8 @@ const collectionShareInfo: HandlerFn = errorHandler(async function (
         defaultDocument: col.defaultDocument
     };
     if(owner) {
+        // Only allow the owner to know the visibility
+        // And the shared users
         answer.visibility = col.visibility;
         answer.users = await col.sharedTo();
     }

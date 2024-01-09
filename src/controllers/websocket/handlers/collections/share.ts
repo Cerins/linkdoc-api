@@ -37,6 +37,7 @@ const collectionShare: HandlerFn = errorHandler(async function (
     if (visibility !== undefined) {
         await col.setVisibility(visibility);
     }
+    // Go through each user and set the access
     await Promise.all(
         (users ?? []).map(async ({ name, role }) => {
             const usr = await this.models.User.findOne({

@@ -19,14 +19,7 @@ class PubSub implements IPubSubGateway {
             // Exclamation mark is ok, since the
             // it is guaranteed that each member is registered with a function
             const fn = this.memberFn.get(this.fnKey(room, member))!;
-            // TODO maybe make this async
-            // TODO is there some downside to this catch
-            // ig it makes debugging issues harder
-            // so i will temp comment it
-            // try{
             fn(content);
-            // eslint-disable-next-line no-empty
-            // } catch(err) {}
         }
     }
 

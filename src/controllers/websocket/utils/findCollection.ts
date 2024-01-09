@@ -4,6 +4,7 @@ import collectionCheckedInner from '../../utils/findCollection';
 // Use the same args as in the original function
 type Args = Parameters<typeof collectionCheckedInner>;
 
+// Wrapped to throw RequestError instead of Error
 export default async function collectionChecked(
     ...args: Args
 ) {

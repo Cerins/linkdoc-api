@@ -31,6 +31,8 @@ export default function defineUserGateway(dependencies: Dependencies) {
             const limit = args[0]?.limit;
             const before = args[0]?.before;
             const { id } = this;
+            // The time is either the last time the collection was opened or the time it was created
+            // TODO: Maybe this query can be optimized
             let query = db
                 .select('*')
                 .from(function (this: Knex.QueryBuilder) {
@@ -64,6 +66,8 @@ export default function defineUserGateway(dependencies: Dependencies) {
                 query = query.limit(limit);
             }
             const res = (await query) as getCollectionListReturn;
+            // It is not certain that the time is a Date object
+            // So we convert it to a Date object
             return res.map((v)=>({
                 ...v,
                 time: new Date(v.time)
